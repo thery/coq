@@ -353,6 +353,7 @@ Another variant allows to treat the ``else`` case first:
 Note that :token:`pattern` eventually binds variables in the third
 :token:`term` and not in the second :token:`term`.
 
+.. _parametric_polymorphism_ssr:
 
 Parametric polymorphism
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -769,6 +770,8 @@ Moreover:
 + Typeclass inference should fill in any residual hole, but matching
   should never assign a value to a global existential variable.
 
+
+.. _occurrence_selection_ssr:
 
 Occurrence selection
 ````````````````````
@@ -2593,6 +2596,7 @@ copying the goal itself.
 The ``suff`` modifier is not
 compatible with the presence of a list of binders.
 
+.. _generating_let_ssr:
 
 Generating let in context entries with have
 ```````````````````````````````````````````
@@ -3891,6 +3895,7 @@ Like most |SSR| arguments, term can contain wildcards.
      Lemma test x y : x + (y * (y + x - x)) = x * 1 + (y + 0) * y.
      congr ( _ + (_ * _)).
 
+.. _contextual_patterns_ssr:
 
 Contextual patterns
 -------------------
@@ -5083,6 +5088,8 @@ In this context, the identity view can be used when no view has to be applied:
      apply/norP/idP.
 
 
+.. _declaring_new_hints_ssr:
+
 Declaring new Hint Views
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -5271,52 +5278,53 @@ Items and switches
 ~~~~~~~~~~~~~~~~~~
 
 .. prodn:: binder ::= @ident %| ( @ident {? : @term } ) 
-binder p. ?? 
+binder see :ref:`abbreviations_ssr`.
+
 
 .. prodn:: clear_switch ::= { {+ @ident } } 
-clear switch p. ?? 
+clear switch see :ref:`discharge_ssr` 
 
 .. prodn:: c_pattern ::= {? @term in %| @term as } @ident in @term 
-context pattern p. ?? 
+context pattern see :ref:`contextual_patterns_ssr`
 
 .. prodn:: d_item ::= {? @occ_switch %| @clear_switch } {? @term %| ( @c_pattern ) } 
-discharge item p. ?? 
+discharge item see :ref:`discharge_ssr` 
 
 .. prodn:: gen_item ::= {? @  } @ident %| ( @ident ) %| ( {? @  } @ident := @c_pattern ) 
-generalization item p. ?? 
+generalization item see :ref:`structure_ssr` 
 
 .. prodn:: i_pattern ::= @ident %| _ %| ? %| * %| {? @occ_switch } -> %| {? @occ_switch } <- %| [ {*| {* @i_item } } %| - %| [: {+ @ident } ] 
-intro pattern p. ?? 
+intro pattern :ref:`introduction_ssr`
 
 .. prodn:: i_item ::= @clear_switch %| @s_item %| @i_pattern %| / @term 
-intro item p. ?? 
+intro item  see :ref:`introduction_ssr`
 
 .. prodn:: int_mult ::= {? @num } @mult_mark 
-multiplier p. ?? 
+multiplier  see :ref:`iteration_ssr`
 
 .. prodn:: occ_switch ::= { {? + %| - } {* @natural } } 
-occur. switch p. ?? 
+occur. switch see :ref:`occurrence_selection_ssr`
 
 .. prodn:: mult ::= {? @natural } @mult_mark
-multiplier p. ?? 
+multiplier see :ref:`iteration_ssr`
 
 .. prodn:: mult_mark ::= ? %| !
-multiplier mark p. ?? 
+multiplier mark see :ref:`iteration_ssr`
 
 .. prodn:: r_item ::= {? / } @term %| @s_item 
-rewrite item p. ??
+rewrite item see :ref:`rewriting_ssr`
 
 .. prodn:: r_prefix ::= {? - } {? @int_mult } {? @occ_switch %| @clear_switch } {? [ @r_pattern ] }
-rewrite prefix p. ?? 
+rewrite prefix see :ref:`rewriting_ssr`
 
 .. prodn:: r_pattern ::= @term %| @c_pattern %| in {? @ident in } @term 
-rewrite pattern p. ?? 
+rewrite pattern see :ref:`rewriting_ssr`
 
 .. prodn:: r_step ::= {? @r_prefix } @r_item 
-rewrite step p. ??  
+rewrite step see :ref:`rewriting_ssr`
 
 .. prodn:: s_item ::= /= %| // %| //= 
-simplify switch p. ??
+simplify switch see :ref:`introduction_ssr`
 
 Tactics
 ~~~~~~~
@@ -5326,28 +5334,28 @@ respectively.
 
 .. tacn:: move 
 
-idtac or hnf p. ?? 
+idtac or hnf see  :ref:`bookkeeping_ssr`
 
 .. tacn:: apply 
 .. tacn:: exact 
 
-application p. ?? 
+application see :ref:`the_defective_tactics_ssr`
 
 .. tacn:: abstract 
 
-p. ??, ?? 
+ see :ref:`abstract_ssr` and :ref:`generating_let_ssr`
 
 .. tacn:: elim 
 
-induction p. ?? 
+induction see :ref:`the_defective_tactics_ssr`
 
 .. tacn:: case
 
-case analysis p. ?? 
+case analysis see :ref:`the_defective_tactics_ssr` 
 
 .. tacn:: rewrite {+ @r_step }
 
-rewrite p. ?? 
+rewrite  see :ref:`rewriting_ssr`
 
 .. tacn:: have {* @i_item } {? @i_pattern } {? @s_item %| {+ @binder } } {? : @term } := @term
 .. tacv:: have {* @i_item } {? @i_pattern } {? @s_item %| {+ @binder } } : @term {? by @tactic }
@@ -5355,19 +5363,19 @@ rewrite p. ??
 .. tacv:: have suff {? @clear_switch } {? @i_pattern } : @term {? by @tactic }
 .. tacv:: gen have {? @ident , } {? @i_pattern } : {+ @gen_item } / @term {? by @tactic }
 
-forward p. ?? 
-chaining 
+forward  chaining see :ref:`structure_ssr` 
+
 
 .. tacn:: wlog {? suff } {? @i_item } : {* @gen_item %| @clear_switch } / @term 
-specializing p. ??
+specializing see :ref:`structure_ssr` 
 
 .. tacn:: suff {* @i_item } {? @i_pattern } {+ @binder } : @term {? by @tactic }
 .. tacv:: suff {? have } {? @clear_switch } {? @i_pattern } : @term {? by @tactic }
-p. ?? 
-backchaining
+
+backchaining see :ref:`structure_ssr` 
 
 .. tacn:: pose @ident := @term
-local definition p. ?? 
+local definition :ref:`definitions_ssr` 
 
 .. tacv:: pose @ident {+ @binder } := @term 
 
@@ -5383,53 +5391,52 @@ local cofix definition
 
 .. tacn:: set @ident {? : @term } := {? @occ_switch } %( @term %| ( @c_pattern) %) 
 
-abbreviation p. ?? 
+abbreviation see :ref:`abbreviations_ssr`
 
 .. tacn:: unlock {* {? @r_prefix } @ident }
 
-unlock p. ?? 
+unlock see :ref:`locking_ssr`
 
 .. tacn:: congr {? @num } @term
 
-congruence p. ??
+congruence :ref:`congruence_ssr`
 
 
 Tacticals
 ~~~~~~~~~
 
 .. prodn:: tactic += @d_tactic {? @ident } : {+ @d_item } {? @clear_switch }
-discharge p. ?? 
+discharge :ref:`discharge_ssr` 
 
 .. prodn:: tactic += @tacitc => {+ @i_item }
-introduction p. ?? 
+introduction see :ref:`introduction_ssr`
 
 .. prodn:: tactic += @tactic in {+ @gen_item %| @clear_switch } {? * }
-localization p. ?? 
+localization see :ref:`localization_ssr`
 
 .. prodn:: tactic += do {? @mult } %( @tactic %| [ {+| @tactic } ] %)
-iteration p. ??
+iteration  see :ref:`iteration_ssr`
 
 .. prodn:: tactic += @tactic ; %( first %| last %) {? @num } %( @tactic %| [ {+| @tactic } ] %)
-selector p. ?? 
+selector  see :ref:`selectors_ssr`
 
 .. prodn:: tactic += @tactic ; %( first %| last %) {? @num } 
-rotation
+rotation see :ref:`selectors_ssr`
 
 .. prodn:: tactic += by %( @tactic %| [ {*| @tactic } ] %)
-closing p. ??
+closing see :ref:`terminators_ssr`
 
 Commands
 ~~~~~~~~
 
 .. cmd:: Hint View for %( move %| apply %) / @ident {? | @num }
-view hint declaration p. ?? 
+view hint declaration see :ref:`declaring_new_hints_ssr`
 
 .. cmd:: Hint View for apply // @ident {? @num }
-right hand side double p. ?? view hint
-declaration 
+right hand side double , view hint declaration see :ref:`declaring_new_hints_ssr`
 
 .. cmd:: Prenex Implicits {+ @ident }
-prenex implicits decl. p.  ??
+prenex implicits declaration see :ref:`parametric_polymorphism_ssr`
 
 .. rubric:: Footnotes
 
