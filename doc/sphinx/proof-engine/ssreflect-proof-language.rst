@@ -38,14 +38,14 @@ approach is to avoid moving explicitly hypotheses back and forth between the
 context and the conclusion of the goal. On the contrary in |SSR| all
 bookkeeping is performed on the conclusion of the goal, using for that
 purpose a couple of syntactic constructions behaving similar to tacticals
-(and often named as such in this chapter). The : tactical moves hypotheses
-from the context to the conclusion, while => moves hypotheses from the
+(and often named as such in this chapter). The ``:`` tactical moves hypotheses
+from the context to the conclusion, while ``=>`` moves hypotheses from the
 conclusion to the context, and in moves back and forth an hypothesis from the
 context to the conclusion for the time of applying an action to it.
 
-While naming hypotheses is commonly done by means of an as clause in the
+While naming hypotheses is commonly done by means of an ``as`` clause in the
 basic model of Chapter :ref:`tactics`, it is here to ``=>`` that this task is
-devoted. As tactics leave new assumptions in the conclusion, and are
+devoted. Tactics frequently leave new assumptions in the conclusion, and are
 often followed by ``=>`` to explicitly name them. While generalizing the
 goal is normally not explicitly needed in Chapter :ref:`tactics`, it is an
 explicit operation performed by ``:``.
@@ -151,8 +151,8 @@ compatible with the rest of |Coq|, up to a few discrepancies:
   such as have, set and pose.
 + The generalization of if statements to non-Boolean conditions is turned off
   by |SSR|, because it is mostly subsumed by Coercion to ``bool`` of the
-  ``sumXXX`` types (declared in ``ssrfun.v``) and the if term is pattern then
-  term else term construct (see :ref:`pattern_conditional_ssr`).  To use the
+  ``sumXXX`` types (declared in ``ssrfun.v``) and the ``if`` *term* ``is`` *pattern* ``then``
+  *term* ``else`` *term* construct (see :ref:`pattern_conditional_ssr`).  To use the
   generalized form, turn off the |SSR| Boolean if notation using the command:
   ``Close Scope boolean_if_scope``.
 + The following two options can be unset to disable the incompatible
@@ -239,7 +239,7 @@ match annotations; the full syntax is
 
 where the second :token:`pattern` and the second :token:`term` are *types*.
 
-When the ``as`` and ``return`` are both present, then :token:`ident` is bound
+When the ``as`` and ``return`` keywords are both present, then :token:`ident` is bound
 in both the second :token:`pattern` and the second :token:`term`; variables
 in the optional type :token:`pattern` are bound only in the second term, and
 other variables in the first  :token:`pattern` are bound only in the third
@@ -257,7 +257,7 @@ that is, pattern testing:
 .. prodn::
    term += if @term is @pattern then @term else @term
 
-Although this construct is not strictly ML (it does exits in variants
+Although this construct is not strictly ML (it does exist in variants
 such as the pattern calculus or the ρ-calculus), it turns out to be
 very convenient for writing functions on representations, because most
 such functions manipulate simple data types such as Peano integers,
@@ -330,7 +330,7 @@ As pointed out in section :ref:`compatibility_issues_ssr`,
 this restriction can be removed with
 the command:
 
-Close Scope boolean_if_scope.
+``Close Scope boolean_if_scope.``
 
 Like ``let:`` above, the ``if-is-then-else``
 construct supports
@@ -454,7 +454,7 @@ When in a definition, the type of a certain argument is mandatory, but
 not its name, one usually use “arrow” abstractions for prenex
 arguments, or the ``(_ : term)`` syntax for inner arguments. In |SSR|,
 the latter can be replaced by the open syntax ``of term`` or
-(equivalently) ``term``, which are both syntactically equivalent to a
+(equivalently) ``& term``, which are both syntactically equivalent to a
 ``(_ : term)`` expression.
 
 For instance, the usual two-constructor polymorphic type list, i.e.
@@ -676,20 +676,20 @@ abstracted.
 Matching
 ````````
 
-The matching algorithm compares a pattern term with a subterm of the
+The matching algorithm compares a pattern ``term`` with a subterm of the
 goal by comparing their heads and then pairwise unifying their
 arguments (modulo conversion). Head symbols match under the following
 conditions:
 
 
-+ If the head of term is a constant, then it should be syntactically
++ If the head of ``term`` is a constant, then it should be syntactically
   equal to the head symbol of the subterm.
 + If this head is a projection of a canonical structure, then
   canonical structure equations are used for the matching.
 + If the head of term is *not* a constant, the subterm should have the
   same structure (λ abstraction,let…in structure …).
-+ If the head of term is a hole, the subterm should have at least as
-  many arguments as term.
++ If the head of ``term`` is a hole, the subterm should have at least as
+  many arguments as ``term``.
 
 .. example::
 
@@ -705,12 +705,12 @@ conditions:
       Lemma test (x y z : nat) :  x + y = z.
       set t := _ x.
 
-+ In the special case where term is of the form
-  ``(let f := t0 in f) t1 … tn`` , then the pattern term is treated
++ In the special case where ``term`` is of the form
+  ``(let f := t0 in f) t1 … tn`` , then the pattern ``term`` is treated
   as ``(_ t1 … tn)``. For each
   subterm in the goal having the form ``(A u1 … um)`` with m ≥ n, the
   matching algorithm successively tries to find the largest partial
-  application ``(A u1 … uj)`` convertible to the head ``t0`` of term.
+  application ``(A u1 … uj)`` convertible to the head ``t0`` of ``term``.
 
   .. example::
 
@@ -731,7 +731,7 @@ conditions:
 
 Moreover:
 
-+ Multiple holes in term are treated as independent placeholders.
++ Multiple holes in ``term`` are treated as independent placeholders.
 
   .. example::
 
@@ -748,7 +748,7 @@ Moreover:
         set t := _ + _.
 
 + The type of the subterm matched should fit the type (possibly casted
-  by some type annotations) of the pattern term.
+  by some type annotations) of the pattern ``term``.
 + The replacement of the subterm found by the instantiated pattern
   should not capture variables. In the example above ``x`` is bound
   and should not be captured.
@@ -778,7 +778,7 @@ Occurrence selection
 
 |SSR| provides a generic syntax for the selection of occurrences
 by their position indexes. These *occurrence switches* are shared by
-all|SSR| tactics which require control on subterm selection like
+all |SSR| tactics which require control on subterm selection like
 rewriting, generalization, …
 
 An *occurrence switch* can be:
@@ -805,7 +805,7 @@ An *occurrence switch* can be:
   hidden to the user, for example because of a notation. The vernacular
   ``Set Printing All`` command displays all these hidden occurrences and
   should be used to find the correct coding of the occurrences to be
-  selected[#1]_.
+  selected [#1]_.
 
   .. example::
 
