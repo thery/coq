@@ -4643,8 +4643,7 @@ bookkeeping steps.
 
 
 .. example::
-  With the hypotheses of section :ref:`interpreting_assumptions_ssr`,
-  the following script, where ``~~`` denotes the boolean negation:
+   The following example use the ``~~`` prenex notation for boolean negation:
 
 
   .. coqtop:: reset
@@ -4662,6 +4661,10 @@ bookkeeping steps.
 
      Lemma test a : P ((~~ a) || a).
      apply/PQequiv.
+
+  thus in this case, the tactic ``apply/PQequiv`` is equivalent to
+  ``apply: (iffRL (PQequiv _ _))``, where ``iffRL`` is tha analogue of
+  ``iffRL`` for the converse implication.
 
 Any |SSR| term whose type coerces to a double implication can be
 used as a view for goal interpretation.
@@ -4682,7 +4685,7 @@ In the Calculus of Inductive Construction, there is an obvious
 distinction between logical propositions and boolean values. On the
 one hand, logical propositions are objects of *sort* ``Prop`` which is
 the carrier of intuitionistic reasoning. Logical connectives in
-Prop are *types*, which give precise information on the structure
+``Prop`` are *types*, which give precise information on the structure
 of their proofs; this information is automatically exploited by |Coq|
 tactics.  For example, |Coq| knows that a proof of ``A \/ B`` is
 either a proof of ``A`` or a proof of ``B``.  The tactics ``left`` and
@@ -4727,9 +4730,8 @@ analysis
      Lemma test b : b || ~~ b = true.
      by case: b.
 
-  Once b is replaced by true in the first goal and false in the
-  second one the goals reduce by computations to
-  the trivial ``true = true``.
+  Once ``b`` is replaced by ``true`` in the first goal and by ``false`` in the
+  second one, the goals reduce by computations to the trivial ``true = true``.
 
 Thus, ``Prop`` and ``bool`` are truly complementary: the former supports
 robust natural deduction, the latter allows brute-force
@@ -4789,7 +4791,7 @@ Since the equivalence predicate is defined in |Coq| as:
 
    Definition iff (A B:Prop) := (A -> B) /\ (B -> A).
 
-where ``/\`` is a notation for and:
+where ``/\`` is a notation for ``and``:
 
 .. coqtop:: in
 
@@ -4892,7 +4894,7 @@ is equivalent to the tactic:
 
    intro top; generalize (top term1 … termn); clear top.
 
-where top is a fresh name for introducing the top assumption of the
+where ``top`` is a fresh name for introducing the top assumption of the
 current goal.
 
 
@@ -4936,8 +4938,8 @@ case analysis step.
 
 *View hints* are declared by the user (see section:ref:`views_and_reflection_ssr`.8) and are
 stored in the Hint View database. The proof engine automatically
-detects from the shape of the top assumption top and of the view lemma
-term 0 provided to the tactic the appropriate view hint in the
+detects from the shape of the top assumption ``top`` and of the view lemma
+``term`` provided to the tactic the appropriate view hint in the
 database to be inserted.
 
 If ``term`` is a double implication, then the view hint will be one of
@@ -4957,8 +4959,8 @@ which transforms a double implication into the left-to-right one, or:
 which produces the converse implication. In both cases, the two
 first Prop arguments are implicit.
 
-If term 0 is an instance of the reflect predicate, then A will be one
-of the defined view hints for the reflect predicate, which are by
+If ``term`` is an instance of the ``reflect`` predicate, then ``A`` will be one
+of the defined view hints for the ``reflec``t predicate, which are by
 default the ones present in the file ``ssrbool.v``. These hints are not
 only used for choosing the appropriate direction of the translation,
 but they also allow complex transformation, involving negations.
@@ -5021,8 +5023,8 @@ A goal interpretation view tactic of the form:
 applied to a goal ``top`` is interpreted in the following way:
 
 + If the type of ``term`` is not an instance of the ``reflect`` predicate,
-  nor an equivalence, then the term term 0 is applied to the current
-  goal top, possibly inserting implicit arguments.
+  nor an equivalence, then the term ``term`` is applied to the current
+  goal ``top``, possibly inserting implicit arguments.
 + If the type of ``term`` is an instance of the reflect predicate or an
   equivalence, then a *goal interpretation view hint* can possibly be
   inserted, which corresponds to the application of a term
@@ -5031,7 +5033,7 @@ applied to a goal ``top`` is interpreted in the following way:
 
 Like assumption interpretation view hints, goal interpretation ones
 are user defined lemmas stored (see section :ref:`views_and_reflection_ssr`) in the ``Hint View``
-database bridging the possible gap between the type of term 0 and the
+database bridging the possible gap between the type of ``term`` and the
 type of the goal.
 
 
@@ -5169,9 +5171,9 @@ pass a given hypothesis to a lemma.
      Lemma test (p : P) : True.
      move/P2Q/Q2R in p.
 
-If the list of views is of length two, Hint Views for interpreting
+If the list of views is of length two, ``Hint Views`` for interpreting
 equivalences are indeed taken into account, otherwise only single
-Hint Views are used.
+``Hint Views`` are used.
 
 
 |SSR| searching tool
