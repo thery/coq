@@ -3661,7 +3661,7 @@ together with “term tagging” operations.
 
 The first one uses auxiliary definitions to introduce a provably equal
 copy of any term t. However this copy is (on purpose) *not
-convertible* to t in the |Coq| system [#8]_ . The job is done by the
+convertible* to t in the |Coq| system [#8]_. The job is done by the
 following construction:
 
 .. coqtop:: in
@@ -3797,11 +3797,8 @@ which the function is supplied:
 
 This tactic:
 + checks that the goal is a Leibniz equality
-+ matches both sides of this equality with “term applied to some
-  arguments”, inferring the right number of arguments from the goal and
-  the type of term. This may expand some definitions or fixpoints.
-+ generates the subgoals corresponding to pairwise equalities of the
-  arguments present in the goal.
++ matches both sides of this equality with “term applied to some arguments”, inferring the right number of arguments from the goal and the type of term. This may expand some definitions or fixpoints.
++ generates the subgoals corresponding to pairwise equalities of the arguments present in the goal.
 
 The goal can be a non dependent product ``P -> Q``. In that case, the
 system asserts the equation ``P = Q``, uses it to solve the goal, and
@@ -5281,34 +5278,43 @@ Items and switches
 ~~~~~~~~~~~~~~~~~~
 
 .. prodn:: binder ::= @ident %| ( @ident {? : @term } )
+
 binder see :ref:`abbreviations_ssr`.
 
-
 .. prodn:: clear_switch ::= { {+ @ident } }
+
 clear switch see :ref:`discharge_ssr`
 
 .. prodn:: c_pattern ::= {? @term in %| @term as } @ident in @term
+
 context pattern see :ref:`contextual_patterns_ssr`
 
 .. prodn:: d_item ::= {? @occ_switch %| @clear_switch } {? @term %| ( @c_pattern ) }
+
 discharge item see :ref:`discharge_ssr`
 
 .. prodn:: gen_item ::= {? @  } @ident %| ( @ident ) %| ( {? @  } @ident := @c_pattern )
+
 generalization item see :ref:`structure_ssr`
 
 .. prodn:: i_pattern ::= @ident %| _ %| ? %| * %| {? @occ_switch } -> %| {? @occ_switch } <- %| [ {*| {* @i_item } } %| - %| [: {+ @ident } ]
+
 intro pattern :ref:`introduction_ssr`
 
 .. prodn:: i_item ::= @clear_switch %| @s_item %| @i_pattern %| / @term
+
 intro item  see :ref:`introduction_ssr`
 
 .. prodn:: int_mult ::= {? @num } @mult_mark
+
 multiplier  see :ref:`iteration_ssr`
 
 .. prodn:: occ_switch ::= { {? + %| - } {* @natural } }
+
 occur. switch see :ref:`occurrence_selection_ssr`
 
 .. prodn:: mult ::= {? @natural } @mult_mark
+
 multiplier see :ref:`iteration_ssr`
 
 .. prodn:: mult_mark ::= ? %| !
@@ -5318,15 +5324,19 @@ multiplier mark see :ref:`iteration_ssr`
 rewrite item see :ref:`rewriting_ssr`
 
 .. prodn:: r_prefix ::= {? - } {? @int_mult } {? @occ_switch %| @clear_switch } {? [ @r_pattern ] }
+
 rewrite prefix see :ref:`rewriting_ssr`
 
 .. prodn:: r_pattern ::= @term %| @c_pattern %| in {? @ident in } @term
+
 rewrite pattern see :ref:`rewriting_ssr`
 
 .. prodn:: r_step ::= {? @r_prefix } @r_item
+
 rewrite step see :ref:`rewriting_ssr`
 
 .. prodn:: s_item ::= /= %| // %| //=
+
 simplify switch see :ref:`introduction_ssr`
 
 Tactics
@@ -5409,36 +5419,46 @@ Tacticals
 ~~~~~~~~~
 
 .. prodn:: tactic += @d_tactic {? @ident } : {+ @d_item } {? @clear_switch }
+
 discharge :ref:`discharge_ssr`
 
 .. prodn:: tactic += @tacitc => {+ @i_item }
+
 introduction see :ref:`introduction_ssr`
 
 .. prodn:: tactic += @tactic in {+ @gen_item %| @clear_switch } {? * }
+
 localization see :ref:`localization_ssr`
 
 .. prodn:: tactic += do {? @mult } %( @tactic %| [ {+| @tactic } ] %)
+
 iteration  see :ref:`iteration_ssr`
 
 .. prodn:: tactic += @tactic ; %( first %| last %) {? @num } %( @tactic %| [ {+| @tactic } ] %)
+
 selector  see :ref:`selectors_ssr`
 
 .. prodn:: tactic += @tactic ; %( first %| last %) {? @num }
+
 rotation see :ref:`selectors_ssr`
 
 .. prodn:: tactic += by %( @tactic %| [ {*| @tactic } ] %)
+
 closing see :ref:`terminators_ssr`
 
 Commands
 ~~~~~~~~
 
 .. cmd:: Hint View for %( move %| apply %) / @ident {? | @num }
+
 view hint declaration see :ref:`declaring_new_hints_ssr`
 
 .. cmd:: Hint View for apply // @ident {? @num }
+
 right hand side double , view hint declaration see :ref:`declaring_new_hints_ssr`
 
 .. cmd:: Prenex Implicits {+ @ident }
+
 prenex implicits declaration see :ref:`parametric_polymorphism_ssr`
 
 .. rubric:: Footnotes
