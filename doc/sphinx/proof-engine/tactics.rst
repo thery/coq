@@ -167,6 +167,8 @@ See also: :ref:`TODO-8.3.7-Managingthelocalcontext`,
 :ref:`TODO-2.9-Printingconstructionsinfull`.
 
 
+.. _`applyingtheorems`:
+
 Applying theorems
 ---------------------
 
@@ -3536,6 +3538,8 @@ non-imported hints.
 
    When set, it changes the behavior of an unloaded hint to a immediate fail
    tactic, allowing to emulate an import-scoped hint mechanism.
+
+.. _setimpautotactics:
 
 Setting implicit automation tactics
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
