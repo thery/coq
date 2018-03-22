@@ -92,6 +92,8 @@ list of assignments of the form `name=`:n:`{*; attr}` where
 ANSI escape code. The list of highlight tags can be retrieved with the
 `-list-tags` command-line option of `coqtop`.
 
+.. _bycommandline:
+
 By command line options
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
