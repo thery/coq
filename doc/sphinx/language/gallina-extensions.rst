@@ -2210,6 +2210,8 @@ language, and can be processed by Graphviz tools. The format is
 unspecified if `string` doesn’t end in ``.dot`` or ``.gv``.
 
 
+.. _exvariables:
+
 Existential variables
 ---------------------
 
