@@ -1,4 +1,9 @@
 .. include:: ../replaces.rst
+.. |ra| replace:: :math:`\rightarrow_{\beta\delta\iota}`
+.. |la| replace:: :math:`\leftarrow_{\beta\delta\iota}`
+.. |eq| replace:: `=`:sub:`(by the main correctness theorem)`
+.. |re| replace:: ``(PEeval`` `v` `ap`\ ``)``
+.. |le| replace:: ``(Pphi_dev`` `v` ``(norm`` `ap`\ ``))``
 
 
 .. _theringandfieldtacticfamilies:
@@ -14,7 +19,6 @@ The ring and field tactic families
 .. contents::
    :local:
    :depth: 1
-----
 
 This chapter presents the tactics dedicated to deal with ring and
 field equations.
@@ -137,16 +141,18 @@ first require the module ``ArithRing`` exported by ``Arith``); for |Z|, do
         (a + b + c) ^ 2 = 
          a * a + b ^ 2 + c * c + 2 * a * b + 2 * a * c + 2 * b * c.
     intros; ring.
+    Abort.
     Goal forall a b:Z, 
          2 * a * b = 30 -> (a + b) ^ 2 = a ^ 2 + b ^ 2 + 30.
     intros a b H; ring [H].
+    Abort.
 
 
-.. tacv:: ring [@term1 ... @termn ] 
+.. tacv:: ring [@term1 ... @termn] 
  
 decides the equality of two terms modulo ring operations and rewriting of the equalities defined by :n:`@term1` `...` :n:`@termn`. Each of :n:`@term1 `...` :n:`@termn` has to be a proof of some equality `m = p`, where `m` is a monomial (after “abstraction”), `p` a polynomial and `=` the corresponding equality of the ring structure.
 
-.. tacv:: ring_simplify [@term1 ... @termn| ] @t1 ... @tm in @ident
+.. tacv:: ring_simplify [@term1 ... @termn] @t1 ... @tm in @ident
  
 performs the simplification in the hypothesis named :n:`@ident`.
 
@@ -312,10 +318,10 @@ abstract
   declares the ring as abstract. This is the default.
 
 decidable :n:`@term`
- declares the ring as computational. The expression
- :n:`@term` is the correctness proof of an equality test ``?=!`` (which should be
- evaluable). Its type should be of the form 
-   ``forall x y, x ?=! y = true → x == y``.
+  declares the ring as computational. The expression
+  :n:`@term` is the correctness proof of an equality test ``?=!``
+  (which  hould be evaluable). Its type should be of the form 
+  ``forall x y, x ?=! y = true → x == y``.
 
 morphism :n:`@term`
   declares the ring as a customized one. The expression
@@ -331,7 +337,7 @@ setoid :n:`@term1` :n:`@term2`
   This modifier needs not be used if the setoid and morphisms have been
   declared.
 
-constants [ :n:`@ltac` ] 
+constants [:n:`@ltac`] 
   specifies a tactic expression :n:`@ltac` that, given a
   term, returns either an object of the coefficient set that is mapped
   to the expression via the morphism, or returns
@@ -339,18 +345,18 @@ constants [ :n:`@ltac` ]
   to their counterpart in the coefficient set. This is generally not
   desirable for non trivial computational rings.
 
-preprocess [ :n:`@ltac` ]
+preprocess [:n:`@ltac`]
   specifies a tactic :n:`@ltac` that is applied as a
   preliminary step for ``ring`` and ``ring_simplify``. It can be used to
   transform a goal so that it is better recognized. For instance, ``S n``
   can be changed to ``plus 1 n``.
 
-postprocess [ :n:`@ltac` ]
+postprocess [:n:`@ltac`]
   specifies a tactic :n:`@ltac` that is applied as a final
   step for ``ring_simplify``. For instance, it can be used to undo
   modifications of the preprocessor.
 
-power_tac :n:`@term` [ :n:`@ltac` ] 
+power_tac :n:`@term` [:n:`@ltac`] 
   allows ``ring`` and ``ring_simplify`` to recognize
   power expressions with a constant positive integer exponent (example:
   ::math:`x^2` ). The term :n:`@term` is a proof that a given power function satisfies
@@ -469,19 +475,13 @@ piece of |ML| code guesses the type of `p`, the ring theory `T` to use, an
 abstract polynomial `ap` and a variables map `v` such that `p` is |bdi|-
 equivalent to ``(PEeval`` `v` `ap`\ ``)``. Then we replace it by ``(Pphi_dev`` `v`
 ``(norm`` `ap`\ ``))``, using the main correctness theorem and we reduce it to a
-concrete expression `p’`, which is the concrete normal form of `p`. This is
-summarized in this diagram:
+concrete expression `p’`, which is the concrete normal form of `p`. This is summarized in this diagram:
 
-.. |ra| replace:: :math:`\rightarrow_{\beta\delta\iota}`
-.. |la| replace:: :math:`\leftarrow_{\beta\delta\iota}`
-.. |eq| replace:: `=`:sub:`(by the main correctness theorem)`
-.. |re| replace:: ``(PEeval`` `v` `ap`\ ``)``
-.. |le| replace:: ``(Pphi_dev`` `v` ``(norm`` `ap`\ ``))``
-========= ======= =====
+========= ======  ====
 `p`        |ra|   |re|            
-\          |eq|   \ 
+\          |eq|    \ 
 `p’`       |la|   |le|
-========= ======= =====
+========= ======  ====
 
 The user do not see the right part of the diagram. From outside, the
 tactic behaves like a |bdi| simplification extended with AC rewriting
@@ -492,6 +492,7 @@ Dealing with fields
 ------------------------
 
 .. tacn:: field
+
 The ``field`` tactic is an extension of the ``ring`` to deal with rational
 expression. Given a rational expression :math:`F = 0`. It first reduces the
 expression `F` to a common denominator :math:`N/D = 0` where `N` and `D`
@@ -527,10 +528,11 @@ a field in module ``Qcanon``.
     Goal forall x,
            x <> 0 -> (1 - 1 / x) * x - x + 1 = 0.
     intros; field; auto.
+    Abort.
     Goal forall x y, 
            y <> 0 -> y = x -> x / y = 1.
     intros x y H H1; field [H1]; auto.
-
+    Abort.
 
 .. tacv:: field [@term1 ... @termn] 
 
