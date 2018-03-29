@@ -21,8 +21,12 @@
 .. |class_2| replace:: `class`\ :math:`_{2}`
 .. |Coq| replace:: :smallcaps:`Coq`
 .. |CoqIDE| replace:: :smallcaps:`CoqIDE`
+.. |coqdoc| replace:: ``coqdoc``
 .. |eq_beta_delta_iota_zeta| replace:: `=`\ :math:`_{\small{\beta\delta\iota\zeta}}`
+.. |Emacs| replace:: ``Emacs``
 .. |Gallina| replace:: :smallcaps:`Gallina`
+.. |GNU| replace:: ``GNU``
+.. |HTML| replace:: ``HTML``
 .. |ident_0| replace:: `ident`\ :math:`_{0}`
 .. |ident_1,1| replace:: `ident`\ :math:`_{1,1}`
 .. |ident_1,k_1| replace:: `ident`\ :math:`_{1,k_1}`)
@@ -35,6 +39,7 @@
 .. |ident_n,1| replace:: `ident`\ :math:`_{n,1}`
 .. |ident_n,k_n| replace:: `ident`\ :math:`_{n,k_n}`
 .. |ident_n| replace:: `ident`\ :math:`_{n}`
+.. |Latex| replace:: ``LATEX``
 .. |L_tac| replace:: `L`:sub:`tac`
 .. |ML| replace:: :smallcaps:`ML`
 .. |mod_0| replace:: `mod`\ :math:`_{0}`
@@ -59,6 +64,7 @@
 .. |p_i| replace:: `p`\ :math:`_{i}`
 .. |p_n| replace:: `p`\ :math:`_{n}`
 .. |Program| replace:: :strong:`Program`
+.. |ProofGeneral| replace:: :smallcaps:`Proof General`
 .. |SSR| replace:: :smallcaps:`SSReflect`
 .. |t_1| replace:: `t`\ :math:`_{1}`
 .. |t_i| replace:: `t`\ :math:`_{i}`
@@ -68,6 +74,7 @@
 .. |term_1| replace:: `term`\ :math:`_{1}`
 .. |term_2| replace:: `term`\ :math:`_{2}`
 .. |term_n| replace:: `term`\ :math:`_{n}`
+.. |TEXmacs| replace:: ``TEXmacs``
 .. |type_0| replace:: `type`\ :math:`_{0}`
 .. |type_1| replace:: `type`\ :math:`_{1}`
 .. |type_2| replace:: `type`\ :math:`_{2}`
