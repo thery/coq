@@ -148,11 +148,13 @@ first require the module ``ArithRing`` exported by ``Arith``); for |Z|, do
     Abort.
 
 
-.. tacv:: ring [@term1 ... @termn] 
+.. tacv:: ring [{* @term }] 
  
-decides the equality of two terms modulo ring operations and rewriting of the equalities defined by :n:`@term1` `...` :n:`@termn`. Each of :n:`@term1 `...` :n:`@termn` has to be a proof of some equality `m = p`, where `m` is a monomial (after “abstraction”), `p` a polynomial and `=` the corresponding equality of the ring structure.
+decides the equality of two terms modulo ring operations and 
+the equalities defined by the :n:`@term`\ s.
+Each :n:`@term` has to be a proof of some equality `m = p`, where `m` is a monomial (after “abstraction”), `p` a polynomial and `=` the corresponding equality of the ring structure.
 
-.. tacv:: ring_simplify [@term1 ... @termn] @t1 ... @tm in @ident
+.. tacv:: ring_simplify [{* @term }] {* @term } in @ident
  
 performs the simplification in the hypothesis named :n:`@ident`.
 
@@ -307,12 +309,23 @@ following property:
 
 The syntax for adding a new ring is 
 
-.. cmd:: Add Ring @name : @ring (@mod1, ... , @modn).
+.. cmd:: Add Ring @ident : @term {? ( @ring_mod {* , @ring_mod } )}.
 
-The :n:`@name` is not relevant. It is just used for error messages. The
-term :n:`@ring` is a proof that the ring signature satisfies the (semi-)ring
+The :n:`@ident` is not relevant. It is just used for error messages. The
+:n:`@term` is a proof that the ring signature satisfies the (semi-)ring
 axioms. The optional list of modifiers is used to tailor the behavior
 of the tactic. The following list describes their syntax and effects:
+
+.. prodn::
+   ring_mod ::= abstract %| decidable @term %| morphism @term
+                %| setoid @term @term 
+                %| constants [@ltac] 
+                %| preprocess [@ltac]
+                %| postprocess [@ltac]
+                %| power_tac @term [@ltac] 
+                %| sign @term
+                %| div @term
+
 
 abstract
   declares the ring as abstract. This is the default.
@@ -329,11 +342,12 @@ morphism :n:`@term`
   coefficient and the ring carrier (see ``Ring_theory.ring_morph`` and
   ``Ring_theory.semi_morph``).
 
-setoid :n:`@term1` :n:`@term2` 
-  forces the use of given setoid. The expression
-  :n:`@term1` is a proof that the equality is indeed a setoid (see
-  ``Setoid.Setoid_Theory``), and :n:`@term2` a proof that the ring operations are
-  morphisms (see ``Ring_theory.ring_eq_ext`` and ``Ring_theory.sring_eq_ext``).
+setoid :n:`@term` :n:`@term` 
+  forces the use of given setoid. The first
+  :n:`@term` is a proof that the equality is indeed a setoid (see
+  ``Setoid.Setoid_Theory``), and the second :n:`@term` a proof that the
+  ring operations are morphisms (see ``Ring_theory.ring_eq_ext`` and 
+  ``Ring_theory.sring_eq_ext``).
   This modifier needs not be used if the setoid and morphisms have been
   declared.
 
@@ -534,11 +548,11 @@ a field in module ``Qcanon``.
     intros x y H H1; field [H1]; auto.
     Abort.
 
-.. tacv:: field [@term1 ... @termn] 
+.. tacv:: field [{* @term}] 
 
   decides the equality of two terms modulo
-  field operations and rewriting of the equalities defined  
-  by :n:`@term1` ... :n:`@termn` . Each of :n:`@term1` ...  :n:`@termn` has to be a proof of some equality 
+  field operations and the equalities defined  
+  by the :n:`@term`\ s. Each :n:`@term` has to be a proof of some equality 
   `m` ``=`` `p`, where `m` is a monomial (after “abstraction”), `p` a polynomial 
   and ``=`` the corresponding equality of the field structure.
 
@@ -556,49 +570,49 @@ a field in module ``Qcanon``.
    fraction simplifications. This yields smaller expressions when
    reducing to the same denominator since common factors can be canceled.
 
-.. tacv:: field_simplify [@term1 ... @termn] 
+.. tacv:: field_simplify [{* @term }] 
 
   performs the simplification in the conclusion of the goal using the equalities 
-  defined by :n:`@term1` ... :n:`@termn`.
+  defined by the :n:`@term`\ s.
 
-.. tacv:: field_simplify [@term1 ... @termn] @t1 ... @tm
+.. tacv:: field_simplify [{* @term }] {* @term }
 
-   performs the simplification in the terms :n:`@t1` ... :n:`@tm` of the conclusion of the goal
-   using the equalities defined by :n:`@term1` ... :n:`@termn`.
+   performs the simplification in the terms :n:`@terms`  of the conclusion of the goal
+   using the equalities defined by :n:`@term`\ s inside the brackets.
 
-.. tacv :: field_simplify in @H
+.. tacv :: field_simplify in @ident
 
-   performs the simplification in the assumption :n:`@H`.
+   performs the simplification in the assumption :n:`@ident`.
 
-.. tacv :: field_simplify [@term1 ... @termn] in @H 
+.. tacv :: field_simplify [{* @term }] in @ident 
  
    performs the simplification
-   in the assumption :n:`@H` using the equalities defined by :n:`@term1` ...  :n:`@termn`.
+   in the assumption :n:`@ident` using the equalities defined by the :n:`@term`\ s.
 
-.. tacv:: field_simplify [@term1 ... @termn] @t1 ... @tm in @H
+.. tacv:: field_simplify [{* @term }] {* @term } in @ident
 
-   performs the simplification in the terms :n:`@t1` ... :n:`@tm` of the assumption :n:`@H` using the
-   equalities defined by |term_1| `...` |term_n|.
+   performs the simplification in the :n:`@term`\ s of the assumption :n:`@ident` using the
+   equalities defined by  the :n:`@term`\ s inside the brackets.
 
 .. tacv:: field_simplify_eq
 
    performs the simplification in the conclusion of
    the goal removing the denominator. :math:`F_1 = F_2` becomes :math:`N_1 D_2 = N_2 D_1`.
 
-.. tacv:: field_simplify_eq [@term1 ... @termn]
+.. tacv:: field_simplify_eq [ {* @term }]
 
    performs the simplification in
    the conclusion of the goal using the equalities defined by 
-   :n:`@term1` ... :n:`@termn`.
+   :n:`@term`\ s.
 
-.. tacv:: field_simplify_eq in @H
+.. tacv:: field_simplify_eq in @ident
 
-   performs the simplification in the assumption :n:`@H`.
+   performs the simplification in the assumption :n:`@ident`.
 
-.. tacv:: field_simplify_eq [@term1 ... @termn] in @H
+.. tacv:: field_simplify_eq [{* @term}] in @ident
 
-   performs the simplification in the assumption :n:`@H` using the equalities defined by
-   :n:`@term1` ... :n:`@termn` and removing the denominator.
+   performs the simplification in the assumption :n:`@ident` using the equalities defined by
+   :n:`@terms`\ s and removing the denominator.
 
 
 Adding a new field structure
@@ -648,12 +662,17 @@ zero for the correctness of the algorithm.
 
 The syntax for adding a new field is 
 
-.. cmd:: Add Field @name : @field (@mod1 ... @modn). 
+.. cmd:: Add Field @ident : @term {? ( @field_mod {* , @field_mod } )}.
 
-The :n:`@name` is not relevant. It is just used for error
-messages. :n:`@field` is a proof that the field signature satisfies the
+The :n:`@ident` is not relevant. It is just used for error
+messages. :n:`@term` is a proof that the field signature satisfies the
 (semi-)field axioms. The optional list of modifiers is used to tailor
-the behavior of the tactic. Since field tactics are built upon ``ring``
+the behavior of the tactic.
+
+.. prodn::
+   field_mod := @ring_mod %| completeness @term
+
+Since field tactics are built upon ``ring``
 tactics, all modifiers of the ``Add Ring`` apply. There is only one
 specific modifier:
 
