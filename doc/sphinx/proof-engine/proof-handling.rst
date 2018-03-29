@@ -201,7 +201,7 @@ provide one.
 ..  _`nameaset`:
 
 Name a set of section hypotheses for ``Proof using``
-````````````````````````````````````````````````
+````````````````````````````````````````````````````
 
 The command ``Collection`` can be used to name a set of section
 hypotheses, with the purpose of making ``Proof using`` annotations more
@@ -243,6 +243,7 @@ proof was edited.
 
 
 .. cmdv::  Abort @ident.
+
 Aborts the editing of the proof named :n:`@ident`.
 
 .. cmdv:: Abort All.
@@ -402,20 +403,21 @@ You must put :n:`@bullet2` to focus next goal. No other bullet is allowed here.
 
 You tried to applied a tactic but no goal where under focus. Using :n:`@bullet` is  mandatory here.
 
-.. exn:: No such goal. Try unfocusing with {}. 
+.. exn:: No such goal. Try unfocusing with %{.
 
-You just finished a goal focused by ``{``, you must unfocus it with ``}`.
+You just finished a goal focused by ``{``, you must unfocus it with ``}``.
 
 Set Bullet Behavior
 ```````````````````
 
 The bullet behavior can be controlled by the following commands.
 
-.. cmd:: Set Bullet Behavior "None".
+.. opt:: Bullet Behavior "None".
 
 This makes bullets inactive.
 
-.. cmd:: Set Bullet Behavior "Strict Subproofs".
+.. opt:: Bullet Behavior "Strict Subproofs".
+
 This makes bullets active (this is the default behavior).
 
 
@@ -456,7 +458,8 @@ corresponding existential variable has been named by the user
 Displays the whole list of tactics applied from the
 beginning of the current proof. This tactics script may contain some
 holes (subgoals not yet proved). They are printed under the form
-   ``<Your Tactic Text here>``.
+
+``<Your Tactic Text here>``.
 
 .. cmdv:: Show Proof. 
 
@@ -533,22 +536,18 @@ Controlling the effect of proof editing commands
 ------------------------------------------------
 
 
-.. cmd:: Set Hyps Limit @num.
+.. opt:: Hyps Limit @num.
 
-This command sets the maximum number of hypotheses displayed in goals
+This option controls the maximum number of hypotheses displayed in goals
 after the application of a tactic. All the hypotheses remains usable
 in the proof development.
-
-
-.. cmd:: Unset Hyps Limit.
-
-This command goes back to the default mode which is to print all
+When unset, it goes back to the default mode which is to print all
 available hypotheses.
 
 
-.. cmd:: Set Automatic Introduction.
+.. opt:: Automatic Introduction.
 
-The option ``Automatic Introduction`` controls the way binders are handled
+This option controls the way binders are handled
 in assertion commands such as ``Theorem ident[binders] : form``. When the
 option is set, which is the default, binders are automatically put in
 the local context of the goal to prove.
