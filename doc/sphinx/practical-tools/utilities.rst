@@ -13,6 +13,32 @@ The distribution provides utilities to simplify some tedious works
 beside proof development, tactics writing or documentation.
 
 
+Using Coq as a library
+----------------------
+
+In previous versions, ``coqmktop`` was used to build custom
+toplevels - for example for better debugging or custom static
+linking. Nowadays, the preferred method is to use ``ocamlfind``.
+
+The most basic custom toplevel is built using:
+
+::
+
+   % make tools/tolink.cmx
+   % ocamlfind ocamlopt -thread -rectypes -linkall -linkpkg -package coq.toplevel \
+                 -I tools tolink.cmx toplevel/coqtop_bin.ml -o my_toplevel.native
+
+For example, to statically link |L_tac|, you can add it to ``tools/tolink.ml`` and use:
+
+::
+
+   % make tools/tolink.cmx
+   % ocamlfind ocamlopt -thread -rectypes -linkall -linkpkg \
+                 -package coq.toplevel -package coq.ltac    \
+                 -I tools tolink.cmx toplevel/coqtop\_bin.ml -o my\_toplevel.native
+
+We will remove the need for the ``tolink`` file in the future.
+
 Building a toplevel extended with user tactics
 ----------------------------------------------
 
@@ -146,9 +172,9 @@ CoqMakefile.local
 The optional file ``CoqMakefile.local`` is included by the generated
 file ``CoqMakefile``. It can contain two kinds of directives.
 
-:Variable assignment: 
-  to the variables listed in the ``Parameters``
-  section of the generated makefile. Here we describe only few of them.
+Variable assignment
+  The variable must belong to the variables listed in the ``Parameters`` section of the generated makefile.
+  Here we describe only few of them.
     :CAMLPKGS: 
       can be used to specify third party findlib packages, and is
       passed to the OCaml compiler on building or linking of modules. Eg:
@@ -159,33 +185,53 @@ file ``CoqMakefile``. It can contain two kinds of directives.
     :COQC, COQDEP, COQDOC: 
       can be set in order to use alternative binaries
       (e.g. wrappers)
+    :COQ_SRC_SUBDIRS: can be extended by including other paths in which ``*.cm*`` files are searched. For example ``COQ\_SRC\_SUBDIRS+=user-contrib/Unicoq`` lets you build a plugin containing OCaml code that depends on the OCaml code of ``Unicoq``.
 
+Rule extension 
+  The following makefile rules can be extended.
 
-:Rule extension: 
-  The following makefile rules can be extended. For example
+  .. example ::
 
-  ::
+    ::
 
-    pre-all::
-            echo "This line is print before making the all target"
-    install-extra::
-            cp ThisExtraFile /there/it/goes
+        pre-all::
+                echo "This line is print before making the all target"
+        install-extra::
+                cp ThisExtraFile /there/it/goes
+  
+  ``pre-all::`` 
+    run before the all target. One can use this to configure
+   the project, or initialize sub modules or check dependencies are met.
+ 
+  ``post-all::``
+    run after the all target. One can use this to run a test
+    suite, or compile extracted code.
+    
 
+  ``install-extra::`` 
+    run after install. One can use this to install extra files.
 
-    :pre-all::: run before the all target. One can use this to configure
-      the project, or initialize sub modules or check dependencies are met.
-    :post-all::: run after the all target. One can use this to run a test
-      suite, or compile extracted code.
-    :install-extra::: run after install. One can use this to install extra
-      files.
-    :install-doc::: One can use this to install extra doc.
-    :uninstall:::
-    :uninstall-doc:::
-    :clean:::
-    :cleanall:::
-    :archclean:::
-    :merlin-hook::: One can append lines to the generated .merlin file
-      extending this target.
+  ``install-doc::`` 
+    One can use this to install extra doc.
+   
+  ``uninstall::``
+    \ 
+
+  ``uninstall-doc::``
+    \ 
+
+  ``clean::``
+    \
+    
+  ``cleanall::``
+    \ 
+
+  ``archclean::``
+    \
+    
+  ``merlin-hook::``
+    One can append lines to the generated .merlin file extending this
+    target.
 
 Timing targets and performance testing
 ++++++++++++++++++++++++++++++++++++++
@@ -197,26 +243,28 @@ The following targets and Makefile variables allow collection of per-
 file timing data:
 
 
-+ TIMED=1 
++ ``TIMED=1`` 
     passing this variable will cause ``make`` to emit a line
     describing the user-space build-time and peak memory usage for each
-    file built. Note: On ``Mac OS``, this works best if you’ve installed
-    ``gnu-time``.
+    file built.
 
-    Example: For example, the output of ``make TIMED=1`` may look like
-    this:
+    .. note::
+      On ``Mac OS``, this works best if you’ve installed ``gnu-time``.
 
-    ::
+    .. example::
+       For example, the output of ``make TIMED=1`` may look like
+       this:
 
-      COQDEP Fast.v
-      COQDEP Slow.v
-      COQC Slow.v
-      Slow (user: 0.34 mem: 395448 ko)
-      COQC Fast.v
-      Fast (user: 0.01 mem: 45184 ko)
+       ::
 
+          COQDEP Fast.v
+          COQDEP Slow.v
+          COQC Slow.v
+          Slow (user: 0.34 mem: 395448 ko)
+          COQC Fast.v
+          Fast (user: 0.01 mem: 45184 ko)
 
-+ pretty-timed
++ ``pretty-timed``
     this target stores the output of ``make TIMED=1`` into
     ``time-of-build.log``, and displays a table of the times, sorted from
     slowest to fastest, which is also stored in ``time-of-build-pretty.log``.
@@ -224,33 +272,35 @@ file timing data:
     one, you can pass them via the variable ``TGTS``, e.g., ``make pretty-timed
     TGTS="a.vo b.vo"``. 
 
-    Note: This target requires ``python`` to build the
-    table. 
+    .. ::
+       This target requires ``python`` to build the table. 
 
-    Note: This target will *append* to the timing log; if you want a
-    fresh start, you must remove the ``filetime-of-build.log`` or ``run make
-    cleanall``. 
+    .. note::
+       This target will *append* to the timing log; if you want a
+       fresh start, you must remove the ``filetime-of-build.log`` or    
+       ``run make cleanall``. 
 
-    Example: For example, the output of ``make pretty-timed`` may
-    look like this:
+    .. example::
 
-    ::
+      For example, the output of ``make pretty-timed`` may look like this:
 
-      COQDEP Fast.v
-      COQDEP Slow.v
-      COQC Slow.v
-      Slow (user: 0.36 mem: 393912 ko)
-      COQC Fast.v
-      Fast (user: 0.05 mem: 45992 ko)
-      Time     | File Name
-      --------------------
-      0m00.41s | Total
-      --------------------
-      0m00.36s | Slow
-      0m00.05s | Fast
+      ::
+
+        COQDEP Fast.v
+        COQDEP Slow.v
+        COQC Slow.v
+        Slow (user: 0.36 mem: 393912 ko)
+        COQC Fast.v
+        Fast (user: 0.05 mem: 45992 ko)
+        Time     | File Name
+        --------------------
+        0m00.41s | Total
+        --------------------
+        0m00.36s | Slow
+        0m00.05s | Fast
 
 
-+ print-pretty-timed-diff
++ ``print-pretty-timed-diff``
     this target builds a table of timing
     changes between two compilations; run ``make make-pretty-timed-before`` to
     build the log of the “before” times, and run ``make make-pretty-timed-
@@ -259,55 +309,62 @@ file timing data:
     most useful for profiling the difference between two commits to a
     repo.
 
-    Note: This target requires ``python`` to build the table.
+    .. note::
+       This target requires ``python`` to build the table.
 
-    Note: The ``make-pretty-timed-before`` and ``make-pretty-timed-after`` targets will
-    *append* to the timing log; if you want a fresh start, you must remove
-    the files ``time-of-build-before.log`` and ``time-of-build-after.log`` or run
-    ``make cleanall`` *before* building either the “before” or “after”
-    targets.
+    .. note:: 
+       The ``make-pretty-timed-before`` and ``make-pretty-timed-after`` targets will
+       *append* to the timing log; if you want a fresh start, you must remove
+       the files ``time-of-build-before.log`` and ``time-of-build-after.log`` or run
+       ``make cleanall`` *before* building either the “before” or “after”
+       targets.
 
-    Note: The table will be sorted first by absolute time
-    differences rounded towards zero to a whole-number of seconds, then by
-    times in the “after” column, and finally lexicographically by file
-    name. This will put the biggest changes in either direction first, and
-    will prefer sorting by build-time over subsecond changes in build time
-    (which are frequently noise); lexicographic sorting forces an order on
-    files which take effectively no time to compile.
+    .. note::
+       The table will be sorted first by absolute time
+       differences rounded towards zero to a whole-number of seconds, then by
+       times in the “after” column, and finally lexicographically by file
+       name. This will put the biggest changes in either direction first, and
+       will prefer sorting by build-time over subsecond changes in build time
+       (which are frequently noise); lexicographic sorting forces an order on
+       files which take effectively no time to compile.
 
-    Example: For example,
-    the output table from ``make print-pretty-timed-diff`` may look like this:
+    .. example::
+        For example, the output table from 
+        ``make print-pretty-timed-diff`` may look like this:
 
-    ::
+        ::
 
-      After    | File Name | Before   || Change    | % Change
-      --------------------------------------------------------
-      0m00.39s | Total     | 0m00.35s || +0m00.03s | +11.42%
-      --------------------------------------------------------
-      0m00.37s | Slow      | 0m00.01s || +0m00.36s | +3600.00%
-      0m00.02s | Fast      | 0m00.34s || -0m00.32s | -94.11%
-
+          After    | File Name | Before   || Change    | % Change
+          --------------------------------------------------------
+          0m00.39s | Total     | 0m00.35s || +0m00.03s | +11.42%
+          --------------------------------------------------------
+          0m00.37s | Slow      | 0m00.01s || +0m00.36s | +3600.00%
+          0m00.02s | Fast      | 0m00.34s || -0m00.32s | -94.11%
 
 
 The following targets and ``Makefile`` variables allow collection of per-
 line timing data:
 
 
-+ TIMING=1
++ ``TIMING=1``
     passing this variable will cause ``make`` to use ``coqc -time`` to
     write to a ``.v.timing`` file for each ``.v`` file compiled, which contains
     line-by-line timing information.
 
-    Example: For example, running ``make all TIMING=1`` may result in a file like this:
+    .. example::
+       For example, running ``make all TIMING=1`` may result in a file like this:
 
+       ::
+
+          Chars 0 - 26 [Require~Coq.ZArith.BinInt.] 0.157 secs (0.128u,0.028s)
+          Chars 27 - 68 [Declare~Reduction~comp~:=~vm_c...] 0. secs (0.u,0.s)
+          Chars 69 - 162 [Definition~foo0~:=~Eval~comp~i...] 0.153 secs (0.136u,0.019s)
+          Chars 163 - 208 [Definition~foo1~:=~Eval~comp~i...] 0.239 secs (0.236u,0.s)
+
++ ``print-pretty-single-time-diff``
     ::
 
-        Chars 0 - 26 [Require~Coq.ZArith.BinInt.] 0.157 secs (0.128u,0.028s)
-        Chars 27 - 68 [Declare~Reduction~comp~:=~vm_c...] 0. secs (0.u,0.s)
-        Chars 69 - 162 [Definition~foo0~:=~Eval~comp~i...] 0.153 secs (0.136u,0.019s)
-        Chars 163 - 208 [Definition~foo1~:=~Eval~comp~i...] 0.239 secs (0.236u,0.s)
-
-+ print-pretty-single-time-diff BEFORE=path/to/file.v.before-timing AFTER=path/to/file.v.after-timing 
+       print-pretty-single-time-diff BEFORE=path/to/file.v.before-timing AFTER=path/to/file.v.after-timing 
     this target will make a sorted table of the per-line timing differences 
     between the timing logs in the ``BEFORE`` and ``AFTER`` files, display it, and 
     save it to the file specified by the ``TIME_OF_PRETTY_BUILD_FILE`` variable,
@@ -315,26 +372,29 @@ line timing data:
     To generate the ``.v.before-timing`` or ``.v.after-timing`` files, you should      
     pass  ``TIMING=before`` or ``TIMING=after`` rather than ``TIMING=1``.
 
-    Note: The sorting used here is the same as in the ``print-pretty-timed -diff`` target.
+    .. note::
+       The sorting used here is the same as in the ``print-pretty-timed -diff`` target.
 
-    Note: This target requires python to build the table.
+    .. note::
+       This target requires python to build the table.
 
-    Example: For example, running  ``print-pretty-single-time-diff`` might give a table like this:
+    .. example::
+       For example, running  ``print-pretty-single-time-diff`` might give a table like this:
 
-    ::
+       ::
 
-      After     | Code                                                | Before    || Change    | % Change
-      ---------------------------------------------------------------------------------------------------
-      0m00.50s  | Total                                               | 0m04.17s  || -0m03.66s | -87.96%
-      ---------------------------------------------------------------------------------------------------
-      0m00.145s | Chars 069 - 162 [Definition~foo0~:=~Eval~comp~i...] | 0m00.192s || -0m00.04s | -24.47%
-      0m00.126s | Chars 000 - 026 [Require~Coq.ZArith.BinInt.]        | 0m00.143s || -0m00.01s | -11.88%
-         N/A    | Chars 027 - 068 [Declare~Reduction~comp~:=~nati...] | 0m00.s    || +0m00.00s | N/A
-      0m00.s    | Chars 027 - 068 [Declare~Reduction~comp~:=~vm_c...] |    N/A    || +0m00.00s | N/A
-      0m00.231s | Chars 163 - 208 [Definition~foo1~:=~Eval~comp~i...] | 0m03.836s || -0m03.60s | -93.97%
+          After     | Code                                                | Before    || Change    | % Change
+          ---------------------------------------------------------------------------------------------------
+          0m00.50s  | Total                                               | 0m04.17s  || -0m03.66s | -87.96%
+          ---------------------------------------------------------------------------------------------------
+          0m00.145s | Chars 069 - 162 [Definition~foo0~:=~Eval~comp~i...] | 0m00.192s || -0m00.04s | -24.47%
+          0m00.126s | Chars 000 - 026 [Require~Coq.ZArith.BinInt.]        | 0m00.143s || -0m00.01s | -11.88%
+             N/A    | Chars 027 - 068 [Declare~Reduction~comp~:=~nati...] | 0m00.s    || +0m00.00s | N/A
+          0m00.s    | Chars 027 - 068 [Declare~Reduction~comp~:=~vm_c...] |    N/A    || +0m00.00s | N/A
+          0m00.231s | Chars 163 - 208 [Definition~foo1~:=~Eval~comp~i...] | 0m03.836s || -0m03.60s | -93.97%
 
 
-+ all.timing.diff, path/to/file.v.timing.diff
++ ``all.timing.diff``, ``path/to/file.v.timing.diff``
     The ``path/to/file.v.timing.diff`` target will make a ``.v.timing.diff`` file for
     the corresponding ``.v`` file, with a table as would be generated by
     the ``print-pretty-single-time-diff`` target; it depends on having already
@@ -344,7 +404,8 @@ line timing data:
     all of the ``.v`` files that the ``Makefile`` knows about. It will fail if
     some ``.v.before-timing`` or ``.v.after-timing`` files don’t exist.
 
-    Note: This target requires python to build the table.
+    .. note::
+      This target requires python to build the table.
 
 
 Reusing/extending the generated Makefile
@@ -357,35 +418,37 @@ include ``Makefile.conf`` or call a target of the generated Makefile as in
 ``make -f Makefile target`` from another Makefile.
 
 One way to get access to all targets of the generated ``CoqMakefile`` is to
-have a generic target for invoking unknown targets. For example:
+have a generic target for invoking unknown targets. 
 
-::
+.. example::
 
-    # KNOWNTARGETS will not be passed along to CoqMakefile
-    KNOWNTARGETS := CoqMakefile extra-stuff extra-stuff2
-    # KNOWNFILES will not get implicit targets from the final rule, and so
-    # depending on them won't invoke the submake
-    # Warning: These files get declared as PHONY, so any targets depending
-    # on them always get rebuilt
-    KNOWNFILES   := Makefile _CoqProject
-    
-    .DEFAULT_GOAL := invoke-coqmakefile
-    
-    CoqMakefile: Makefile _CoqProject
-     $(COQBIN)coq_makefile -f _CoqProject -o CoqMakefile
-    
-    invoke-coqmakefile: CoqMakefile
-     $(MAKE) --no-print-directory -f CoqMakefile $(filter-out $(KNOWNTARGETS),$(MAKECMDGOALS))
-    
-    .PHONY: invoke-coqmakefile $(KNOWNFILES)
-    
-    ####################################################################
-    ##                      Your targets here                         ##
-    ####################################################################
-    
-    # This should be the last rule, to handle any targets not declared above
-    %: invoke-coqmakefile
-     @true
+  ::
+
+      # KNOWNTARGETS will not be passed along to CoqMakefile
+      KNOWNTARGETS := CoqMakefile extra-stuff extra-stuff2
+      # KNOWNFILES will not get implicit targets from the final rule, and so
+      # depending on them won't invoke the submake
+      # Warning: These files get declared as PHONY, so any targets depending
+      # on them always get rebuilt
+      KNOWNFILES   := Makefile _CoqProject
+      
+      .DEFAULT_GOAL := invoke-coqmakefile
+       
+      CoqMakefile: Makefile _CoqProject
+              $(COQBIN)coq_makefile -f _CoqProject -o CoqMakefile
+      
+      invoke-coqmakefile: CoqMakefile
+              $(MAKE) --no-print-directory -f CoqMakefile $(filter-out $(KNOWNTARGETS),$(MAKECMDGOALS))
+      
+      .PHONY: invoke-coqmakefile $(KNOWNFILES)
+      
+      ####################################################################
+      ##                      Your targets here                         ##
+      ####################################################################
+      
+      # This should be the last rule, to handle any targets not declared above
+      %: invoke-coqmakefile
+              @true
 
 
 
@@ -395,19 +458,21 @@ Building a subset of the targets with -j
 To build, say, two targets foo.vo and bar.vo in parallel one can use
 ``make only TGTS="foo.vo bar.vo" -j``.
 
-Note that ``make foo.vo bar.vo -j`` has a different meaning for the make
-utility, in particular it may build a shared prerequisite twice.
+.. note::
+
+  ``make foo.vo bar.vo -j`` has a different meaning for the make
+  utility, in particular it may build a shared prerequisite twice.
 
 
-Notes for users of coq_makefile with version < 8.7
-++++++++++++++++++++++++++++++++++++++++++++++++++
+.. note::
 
+  For users of coq_makefile with version < 8.7
 
-+ Support for “sub-directory” is deprecated. To perform actions before
-  or after the build (like invoking ``make`` on a subdirectory) one can hook
-  in pre-all and post-all extension points.
-+ ``-extra-phony`` and ``-extra`` are deprecated. To provide additional target
-  (``.PHONY`` or not) please use ``CoqMakefile.local``.
+  + Support for “sub-directory” is deprecated. To perform actions before
+    or after the build (like invoking ``make`` on a subdirectory) one can hook
+    in pre-all and post-all extension points.
+  + ``-extra-phony`` and ``-extra`` are deprecated. To provide additional target
+    (``.PHONY`` or not) please use ``CoqMakefile.local``.
 
 
 
@@ -522,15 +587,16 @@ Initially, the pretty-printing table contains the following mapping:
 Any of these can be overwritten or suppressed using the printing
 commands.
 
-Important note: the recognition of tokens is done by a (``ocaml``) lex
-automaton and thus applies the longest-match rule. For instance, `->~`
-is recognized as a single token, where |Coq| sees two tokens. It is the
-responsibility of the user to insert space between tokens *or* to give
-pretty-printing rules for the possible combinations, e.g.
+.. note :: 
+  The recognition of tokens is done by a (``ocaml``) lex
+  automaton and thus applies the longest-match rule. For instance, `->~`
+  is recognized as a single token, where |Coq| sees two tokens. It is the
+  responsibility of the user to insert space between tokens *or* to give
+  pretty-printing rules for the possible combinations, e.g.
 
-::
+  ::
 
-    (** printing ->~ %\ensuremath{\rightarrow\lnot}% *)
+      (** printing ->~ %\ensuremath{\rightarrow\lnot}% *)
 
 
 
@@ -540,14 +606,15 @@ Sections.
 Sections are introduced by 1 to 4 leading stars (i.e. at the beginning
 of the line) followed by a space. One star is a section, two stars a
 sub-section, etc. The section title is given on the remaining of the
-line. Example:
+line. 
 
-::
+.. example::
 
-        (** * Well-founded relations
-      
-            In this section, we introduce...  *)
-
+  ::
+  
+          (** * Well-founded relations
+        
+              In this section, we introduce...  *)
 
 
 Lists.
@@ -561,20 +628,20 @@ be the first non-space character on its line (so, in particular, a
 list can not begin on the first line of a comment - start it on the
 second line instead).
 
-Example:
+.. example::
 
-::
+  ::
 
-         We go by induction on [n]:
-         - If [n] is 0...
-         - If [n] is [S n'] we require...
-    
-           two paragraphs of reasoning, and two subcases:
-    
-           - In the first case...
-           - In the second case...
-    
-         So the theorem holds.
+           We go by induction on [n]:
+           - If [n] is 0...
+           - If [n] is [S n'] we require...
+      
+             two paragraphs of reasoning, and two subcases:
+      
+             - In the first case...
+             - In the second case...
+      
+           So the theorem holds.
 
 
 
@@ -612,24 +679,26 @@ escape sequences:
 + ``#...HTML stuff...#`` inserts some |HTML| material. Simply discarded in
   |Latex| output.
 
-
-Note: to simply output the characters ``$``, ``%`` and ``#`` and escaping
-their escaping role, these characters must be doubled.
+.. note::
+  to simply output the characters ``$``, ``%`` and ``#`` and escaping
+  their escaping role, these characters must be doubled.
 
 
 Verbatim.
 +++++++++
 
 Verbatim material is introduced by a leading ``<<`` and closed by ``>>``
-at the beginning of a line. Example:
+at the beginning of a line. 
 
-::
+.. example::
 
-    Here is the corresponding caml code:
-    <<
-      let rec fact n = 
-        if n <= 1 then 1 else n * fact (n-1)
-    >>
+  ::
+
+      Here is the corresponding caml code:
+      <<
+        let rec fact n = 
+          if n <= 1 then 1 else n * fact (n-1)
+      >>
 
 
 
@@ -711,7 +780,8 @@ Command line options
 ++++++++++++++++++++
 
 
-:Overall options:
+**Overall options**
+
 
   :--|HTML|: Select a |HTML| output.
   :--|Latex|: Select a |Latex| output.
@@ -739,7 +809,7 @@ Command line options
 
 
 
-:Index options:
+**Index options**
 
   Default behavior is to build an index, for the |HTML| output only,
   into ``index.html``.
@@ -752,7 +822,7 @@ Command line options
 
 
 
-:Table of contents option:
+**Table of contents option**
 
   :-toc, --table-of-contents: Insert a table of contents. For a |Latex|
     output, it inserts a ``\tableofcontents`` at the beginning of the
@@ -762,7 +832,7 @@ Command line options
     contents.
 
 
-:Hyperlinks options:
+**Hyperlinks options**
 
   :--glob-from file: Make references using |Coq| globalizations from file
     file. (Such globalizations are obtained with Coq option ``-dump-glob``).
@@ -773,12 +843,15 @@ Command line options
     `<http://coq.inria.fr/library/>`_). This is equivalent to ``--external url
     Coq``.
   :-R dir coqdir: Map physical directory dir to |Coq| logical
-    directory  ``coqdir`` (similarly to |Coq| option ``-R``). Note: option ``-R`` only has
-    effect on the files *following* it on the command line, so you will
-    probably need to put this option first.
+    directory  ``coqdir`` (similarly to |Coq| option ``-R``). 
+
+    .. note::
+      option ``-R`` only has
+      effect on the files *following* it on the command line, so you will
+      probably need to put this option first.
 
 
-:Title options:
+**Title options**
 
   :-s , --short: Do not insert titles for the files. The default
     behavior is to insert a title like “Library Foo” for each file.
@@ -798,7 +871,7 @@ Command line options
   :-t string, --title string: Set the document title.
 
 
-:Contents options:
+**Contents options**
 
   :-g, --gallina: Do not print proofs.
   :-l, --light: Light mode. Suppress proofs (as with ``-g``) and the following commands:
@@ -824,7 +897,7 @@ Command line options
   :--interpolate: Use the globalization information to typeset
     identifiers appearing in |Coq| escapings inside comments.
 
-:Language options:
+**Language options**
 
 
   Default behavior is to assume ASCII 7 bits input files.
@@ -939,7 +1012,7 @@ facility:
 
 
 An inferior mode to run |Coq| under |Emacs|, by Marco Maggesi, is also
-included in the distribution, in file ``coq-inferior.el``. Instructions to
+included in the distribution, in file ``inferior-coq.el``. Instructions to
 use it are contained in this file.
 
 
