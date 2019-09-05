@@ -15,3 +15,4 @@ Fixpoint pow (r:R) (n:nat) : R :=
     | O => 1
     | S n => Rmult r (pow r n)
   end.
+Infix "^" := pow : R_scope.

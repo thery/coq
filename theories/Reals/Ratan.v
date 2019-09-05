@@ -230,7 +230,7 @@ Proof.
 intros x pr.
 assert (cos x <> 0).
  apply Rgt_not_eq, cos_gt_0; rewrite <- ?Ropp_div; tauto.
-unfold tan; reg; unfold pow, Rsqr; field; assumption.
+unfold tan; reg; unfold pow; field; assumption.
 Qed.
 
 (** Proof that tangent is a bijection *)
@@ -667,7 +667,7 @@ Qed.
 
 Lemma derive_pt_atan : forall x,
       derive_pt atan x (derivable_pt_atan x) =
-         1 / (1 + x²).
+         1 / (1 + x ^ 2).
 Proof.
 intros x.
 destruct (frame_tan x) as [ub [[ub0 ubpi] Pub]].
@@ -718,7 +718,6 @@ rewrite t.
 assert (t' := atan_bound x).
 rewrite <- (pr_nu tan (atan x) (derivable_pt_tan _ t')). 
 rewrite derive_pt_tan, atan_right_inv.
-replace (Rsqr x) with (x ^ 2) by (unfold Rsqr; ring).
 reflexivity.
 Qed.
 
@@ -727,7 +726,6 @@ Lemma derivable_pt_lim_atan :
 Proof.
 intros x.
 apply derive_pt_eq_1 with (derivable_pt_atan x).
-replace (x ^ 2) with (x * x) by ring.
 rewrite <- (Rmult_1_l (Rinv _)).
 apply derive_pt_atan.
 Qed.
@@ -1372,9 +1370,9 @@ apply continuity_const ; unfold constant ; intuition.
 apply derivable_continuous ; apply derivable_pow.
 intro x ; apply Rgt_not_eq ; apply Rge_gt_trans with (1+0) ; [|lra] ;
  apply Rplus_ge_compat_l.
- replace (x^2) with (x²).
+ replace (x^2) with (x ^ 2).
  apply Rle_ge ; apply Rle_0_sqr.
- unfold Rsqr ; field.
+ field.
 Qed.
 
 Lemma derivable_pt_lim_ps_atan : forall x, -1 < x < 1 ->
@@ -1482,7 +1480,6 @@ intros x x_encad Pratan Prmymeta.
   apply derive_pt_eq_0 ; assumption.
   rewrite derive_pt_atan.
   rewrite Hrew1.
-  replace (Rsqr x) with (x ^ 2) by (unfold Rsqr; ring).
   unfold Rdiv; rewrite Rmult_1_l; reflexivity.
      lra.
     assumption.

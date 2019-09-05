@@ -155,7 +155,7 @@ Proof with trivial.
   apply Rinv_0_lt_compat; apply Rlt_sqrt2_0...
   rewrite Rsqr_div...
   rewrite Rsqr_1; rewrite Rsqr_sqrt...
-  unfold Rsqr; pattern (cos (PI / 4)) at 1;
+  rewrite Rsqr_def; pattern (cos (PI / 4)) at 1;
     rewrite <- sin_cos_PI4;
       replace (sin (PI / 4) * cos (PI / 4)) with
       (1 / 2 * (2 * sin (PI / 4) * cos (PI / 4))) by field.
@@ -206,7 +206,7 @@ Proof with trivial.
   apply Rlt_sqrt3_0...
   apply Rinv_0_lt_compat; prove_sup0...
   rewrite Rsqr_div...
-  rewrite cos2; unfold Rsqr; rewrite sin_PI6; rewrite sqrt_def...
+  rewrite cos2; rewrite Rsqr_def; rewrite sin_PI6; rewrite sqrt_def...
   field.
   left ; prove_sup0.
 Qed.
@@ -257,7 +257,7 @@ Lemma cos_2PI3 : cos (2 * (PI / 3)) = -1 / 2.
 Proof.
   rewrite cos_2a, sin_PI3, cos_PI3.
   replace (sqrt 3 / 2 * (sqrt 3 / 2)) with ((sqrt 3 * sqrt 3) / 4) by field.
-  rewrite sqrt_sqrt.
+  rewrite <- !Rsqr_def, sqrt_sqr.
   field.
   left ; prove_sup0.
 Qed.
@@ -357,9 +357,9 @@ Definition sind (x:R) : R := sin (toRad x).
 Definition cosd (x:R) : R := cos (toRad x).
 Definition tand (x:R) : R := tan (toRad x).
 
-Lemma Rsqr_sin_cos_d_one : forall x:R, Rsqr (sind x) + Rsqr (cosd x) = 1.
+Lemma Rsqr_sin_cos_d_one x : (sind x) ^ 2 + (cosd x) ^ 2 = 1.
 Proof.
-  intro x; unfold sind; unfold cosd; apply sin2_cos2.
+  unfold sind; unfold cosd; apply sin2_cos2.
 Qed.
 
 (***************************************************)

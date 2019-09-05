@@ -21,34 +21,17 @@ Lemma formule :
     f2 x <> 0 ->
     f2 (x + h) <> 0 ->
     (f1 (x + h) / f2 (x + h) - f1 x / f2 x) / h -
-    (l1 * f2 x - l2 * f1 x) / Rsqr (f2 x) =
+    (l1 * f2 x - l2 * f1 x) / ((f2 x) ^ 2) =
     / f2 (x + h) * ((f1 (x + h) - f1 x) / h - l1) +
     l1 / (f2 x * f2 (x + h)) * (f2 x - f2 (x + h)) -
     f1 x / (f2 x * f2 (x + h)) * ((f2 (x + h) - f2 x) / h - l2) +
-    l2 * f1 x / (Rsqr (f2 x) * f2 (x + h)) * (f2 (x + h) - f2 x).
+    l2 * f1 x / (((f2 x) ^ 2) * f2 (x + h)) * (f2 (x + h) - f2 x).
 Proof.
-  intros; unfold Rdiv, Rminus, Rsqr.
+  intros; unfold Rdiv, Rminus.
+  rewrite !Rsqr_def.
   repeat rewrite Rmult_plus_distr_r; repeat rewrite Rmult_plus_distr_l;
     repeat rewrite Rinv_mult_distr; try assumption.
-  replace (l1 * f2 x * (/ f2 x * / f2 x)) with (l1 * / f2 x * (f2 x * / f2 x));
-  [ idtac | ring ].
-  replace (l1 * (/ f2 x * / f2 (x + h)) * f2 x) with
-  (l1 * / f2 (x + h) * (f2 x * / f2 x)); [ idtac | ring ].
-  replace (l1 * (/ f2 x * / f2 (x + h)) * - f2 (x + h)) with
-  (- (l1 * / f2 x * (f2 (x + h) * / f2 (x + h)))); [ idtac | ring ].
-  replace (f1 x * (/ f2 x * / f2 (x + h)) * (f2 (x + h) * / h)) with
-  (f1 x * / f2 x * / h * (f2 (x + h) * / f2 (x + h)));
-  [ idtac | ring ].
-  replace (f1 x * (/ f2 x * / f2 (x + h)) * (- f2 x * / h)) with
-  (- (f1 x * / f2 (x + h) * / h * (f2 x * / f2 x)));
-  [ idtac | ring ].
-  replace (l2 * f1 x * (/ f2 x * / f2 x * / f2 (x + h)) * f2 (x + h)) with
-  (l2 * f1 x * / f2 x * / f2 x * (f2 (x + h) * / f2 (x + h)));
-  [ idtac | ring ].
-  replace (l2 * f1 x * (/ f2 x * / f2 x * / f2 (x + h)) * - f2 x) with
-  (- (l2 * f1 x * / f2 x * / f2 (x + h) * (f2 x * / f2 x)));
-  [ idtac | ring ].
-  repeat rewrite <- Rinv_r_sym; try assumption || ring.
+  now field.
   apply prod_neq_R0; assumption.
 Qed.
 
@@ -105,7 +88,7 @@ Lemma maj_term2 :
     f2 (x + h) <> 0 ->
     (forall a:R,
       Rabs a < alp_f2t2 ->
-      Rabs (f2 (x + a) - f2 x) < Rabs (eps * Rsqr (f2 x) / (8 * l1))) ->
+      Rabs (f2 (x + a) - f2 x) < Rabs (eps * (f2 x) ^ 2 / (8 * l1))) ->
     (forall a:R,
       Rabs a < Rmin eps_f2 alp_f2 -> / Rabs (f2 (x + a)) < 2 / Rabs (f2 x)) ->
     h <> 0 ->
@@ -117,16 +100,16 @@ Proof.
   assert (H8 := H3 h H6).
   assert (H9 := H2 h H5).
   apply Rle_lt_trans with
-    (Rabs (l1 / (f2 x * f2 (x + h))) * Rabs (eps * Rsqr (f2 x) / (8 * l1))).
+    (Rabs (l1 / (f2 x * f2 (x + h))) * Rabs (eps * (f2 x) ^ 2 / (8 * l1))).
   rewrite Rabs_mult; apply Rmult_le_compat_l.
   apply Rabs_pos.
   rewrite <- (Rabs_Ropp (f2 x - f2 (x + h))); rewrite Ropp_minus_distr.
   left; apply H9.
   apply Rlt_le_trans with
-    (Rabs (2 * (l1 / (f2 x * f2 x))) * Rabs (eps * Rsqr (f2 x) / (8 * l1))).
+    (Rabs (2 * (l1 / (f2 x * f2 x))) * Rabs (eps * (f2 x) ^ 2 / (8 * l1))).
   apply Rmult_lt_compat_r.
   apply Rabs_pos_lt.
-  unfold Rdiv; unfold Rsqr; repeat apply prod_neq_R0;
+  unfold Rdiv; repeat apply prod_neq_R0;
     try assumption || discrR.
   red; intro H10; rewrite H10 in H; elim (Rlt_irrefl _ H).
   apply Rinv_neq_0_compat; apply prod_neq_R0; try assumption || discrR.
@@ -146,7 +129,8 @@ Proof.
   unfold Rdiv in H8; exact H8.
   symmetry ; apply Rabs_right; left; prove_sup0.
   right.
-  unfold Rsqr, Rdiv.
+  unfold Rdiv.
+  rewrite Rsqr_def.
   do 1 rewrite Rinv_mult_distr; try assumption || discrR.
   do 1 rewrite Rinv_mult_distr; try assumption || discrR.
   repeat rewrite Rabs_mult.
@@ -178,7 +162,7 @@ Lemma maj_term3 :
       h <> 0 ->
       Rabs h < alp_f2d ->
       Rabs ((f2 (x + h) - f2 x) / h - l2) <
-      Rabs (Rsqr (f2 x) * eps / (8 * f1 x))) ->
+      Rabs ((f2 x) ^ 2 * eps / (8 * f1 x))) ->
     (forall a:R,
       Rabs a < Rmin eps_f2 alp_f2 -> / Rabs (f2 (x + a)) < 2 / Rabs (f2 x)) ->
     h <> 0 ->
@@ -192,20 +176,21 @@ Proof.
   assert (H8 := H2 h H4 H5).
   assert (H9 := H3 h H6).
   apply Rle_lt_trans with
-    (Rabs (f1 x / (f2 x * f2 (x + h))) * Rabs (Rsqr (f2 x) * eps / (8 * f1 x))).
+    (Rabs (f1 x / (f2 x * f2 (x + h))) * Rabs ((f2 x) ^ 2 * eps / (8 * f1 x))).
   rewrite Rabs_mult.
   apply Rmult_le_compat_l.
   apply Rabs_pos.
   left; apply H8.
   apply Rlt_le_trans with
-    (Rabs (2 * (f1 x / (f2 x * f2 x))) * Rabs (Rsqr (f2 x) * eps / (8 * f1 x))).
+    (Rabs (2 * (f1 x / ((f2 x) ^ 2))) * Rabs ((f2 x) ^ 2 * eps / (8 * f1 x))).
   apply Rmult_lt_compat_r.
   apply Rabs_pos_lt.
-  unfold Rdiv; unfold Rsqr; repeat apply prod_neq_R0;
-    try assumption.
+  unfold Rdiv; repeat apply prod_neq_R0;
+    auto with zarith.
   red; intro H10; rewrite H10 in H; elim (Rlt_irrefl _ H).
   apply Rinv_neq_0_compat; apply prod_neq_R0; discrR || assumption.
   unfold Rdiv.
+  rewrite !Rsqr_def.
   repeat rewrite Rinv_mult_distr; try assumption.
   repeat rewrite Rabs_mult.
   replace (Rabs 2) with 2.
@@ -221,7 +206,7 @@ Proof.
   unfold Rdiv in H9; exact H9.
   symmetry ; apply Rabs_right; left; prove_sup0.
   right.
-  unfold Rsqr, Rdiv.
+  unfold Rdiv; rewrite Rsqr_def.
   rewrite Rinv_mult_distr; try assumption || discrR.
   rewrite Rinv_mult_distr; try assumption || discrR.
   repeat rewrite Rabs_mult.
@@ -252,7 +237,7 @@ Lemma maj_term4 :
     (forall a:R,
       Rabs a < alp_f2c ->
       Rabs (f2 (x + a) - f2 x) <
-      Rabs (Rsqr (f2 x) * f2 x * eps / (8 * f1 x * l2))) ->
+      Rabs ((f2 x) ^ 2 * f2 x * eps / (8 * f1 x * l2))) ->
     (forall a:R,
       Rabs a < Rmin eps_f2 alp_f2 -> / Rabs (f2 (x + a)) < 2 / Rabs (f2 x)) ->
     h <> 0 ->
@@ -260,25 +245,25 @@ Lemma maj_term4 :
     Rabs h < Rmin eps_f2 alp_f2 ->
     f1 x <> 0 ->
     l2 <> 0 ->
-    Rabs (l2 * f1 x / (Rsqr (f2 x) * f2 (x + h)) * (f2 (x + h) - f2 x)) <
+    Rabs (l2 * f1 x / ((f2 x) ^ 2 * f2 (x + h)) * (f2 (x + h) - f2 x)) <
     eps / 4.
 Proof.
   intros.
   assert (H9 := H2 h H5).
   assert (H10 := H3 h H6).
   apply Rle_lt_trans with
-    (Rabs (l2 * f1 x / (Rsqr (f2 x) * f2 (x + h))) *
-      Rabs (Rsqr (f2 x) * f2 x * eps / (8 * f1 x * l2))).
+    (Rabs (l2 * f1 x / ((f2 x) ^ 2 * f2 (x + h))) *
+      Rabs ((f2 x) ^ 2 * f2 x * eps / (8 * f1 x * l2))).
   rewrite Rabs_mult.
   apply Rmult_le_compat_l.
   apply Rabs_pos.
   left; apply H9.
   apply Rlt_le_trans with
-    (Rabs (2 * l2 * (f1 x / (Rsqr (f2 x) * f2 x))) *
-      Rabs (Rsqr (f2 x) * f2 x * eps / (8 * f1 x * l2))).
+    (Rabs (2 * l2 * (f1 x / ((f2 x) ^ 2 * f2 x))) *
+      Rabs ((f2 x) ^ 2 * f2 x * eps / (8 * f1 x * l2))).
   apply Rmult_lt_compat_r.
   apply Rabs_pos_lt.
-  unfold Rdiv; unfold Rsqr; repeat apply prod_neq_R0;
+  unfold Rdiv; rewrite !Rsqr_def; repeat apply prod_neq_R0;
     assumption || idtac.
   red; intro H11; rewrite H11 in H; elim (Rlt_irrefl _ H).
   apply Rinv_neq_0_compat; apply prod_neq_R0.
@@ -292,23 +277,25 @@ Proof.
   repeat rewrite Rabs_mult.
   replace (Rabs 2) with 2.
   replace
-  (2 * Rabs l2 * (Rabs (f1 x) * (Rabs (/ Rsqr (f2 x)) * Rabs (/ f2 x)))) with
-  (Rabs l2 * (Rabs (f1 x) * (Rabs (/ Rsqr (f2 x)) * (Rabs (/ f2 x) * 2))));
+  (2 * Rabs l2 * (Rabs (f1 x) * (Rabs (/ ((f2 x) ^ 2)) * Rabs (/ f2 x)))) with
+  (Rabs l2 * (Rabs (f1 x) * (Rabs (/ ((f2 x) ^ 2)) * (Rabs (/ f2 x) * 2))));
   [ idtac | ring ].
   replace
-  (Rabs l2 * Rabs (f1 x) * (Rabs (/ Rsqr (f2 x)) * Rabs (/ f2 (x + h)))) with
-  (Rabs l2 * (Rabs (f1 x) * (Rabs (/ Rsqr (f2 x)) * Rabs (/ f2 (x + h)))));
+  (Rabs l2 * Rabs (f1 x) * (Rabs (/ ((f2 x) ^ 2)) * Rabs (/ f2 (x + h)))) with
+  (Rabs l2 * (Rabs (f1 x) * (Rabs (/ ((f2 x) ^ 2)) * Rabs (/ f2 (x + h)))));
   [ idtac | ring ].
   repeat apply Rmult_lt_compat_l.
   apply Rabs_pos_lt; assumption.
   apply Rabs_pos_lt; assumption.
-  apply Rabs_pos_lt; apply Rinv_neq_0_compat; unfold Rsqr;
+  apply Rabs_pos_lt; apply Rinv_neq_0_compat; rewrite !Rsqr_def;
     apply prod_neq_R0; assumption.
   repeat rewrite Rabs_Rinv; [ idtac | assumption | assumption ].
   rewrite <- (Rmult_comm 2).
   unfold Rdiv in H10; exact H10.
   symmetry ; apply Rabs_right; left; prove_sup0.
-  right; unfold Rsqr, Rdiv.
+  now contradict H0; apply Rsqr_eq_0.
+  now contradict H0; apply Rsqr_eq_0.
+  right; unfold Rdiv; rewrite !Rsqr_def.
   rewrite Rinv_mult_distr; try assumption || discrR.
   rewrite Rinv_mult_distr; try assumption || discrR.
   rewrite Rinv_mult_distr; try assumption || discrR.
@@ -337,7 +324,7 @@ Proof.
   apply prod_neq_R0; assumption.
 Qed.
 
-Lemma D_x_no_cond : forall x a:R, a <> 0 -> D_x no_cond x (x + a).
+Lemma D_x_no_cond x a : a <> 0 -> D_x no_cond x (x + a).
 Proof.
   intros.
   unfold D_x, no_cond.
@@ -352,10 +339,9 @@ Proof.
   apply Ropp_neq_0_compat; assumption.
 Qed.
 
-Lemma Rabs_4 :
-  forall a b c d:R, Rabs (a + b + c + d) <= Rabs a + Rabs b + Rabs c + Rabs d.
+Lemma Rabs_4 a b c d :
+  Rabs (a + b + c + d) <= Rabs a + Rabs b + Rabs c + Rabs d.
 Proof.
-  intros.
   apply Rle_trans with (Rabs (a + b) + Rabs (c + d)).
   replace (a + b + c + d) with (a + b + (c + d)); [ apply Rabs_triang | ring ].
   apply Rle_trans with (Rabs a + Rabs b + Rabs (c + d)).
@@ -365,8 +351,7 @@ Proof.
   apply Rabs_triang.
 Qed.
 
-Lemma Rlt_4 :
-  forall a b c d e f g h:R,
+Lemma Rlt_4 a b c d e f g h :
     a < b -> c < d -> e < f -> g < h -> a + c + e + g < b + d + f + h.
 Proof.
   intros; apply Rlt_trans with (b + c + e + g).

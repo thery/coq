@@ -83,7 +83,7 @@ Proof.
   apply pow_nonzero; assumption.
   assert (H1 := Alembert_sin).
   unfold sin_n in H1; unfold Un_cv in H1; unfold Un_cv; intros.
-  cut (0 < eps / Rsqr r).
+  cut (0 < eps / r ^ 2).
   intro; elim (H1 _ H3); intros N0 H4.
   exists N0; intros.
   unfold R_dist; assert (H6 := H4 _ H5).
@@ -92,21 +92,21 @@ Proof.
     (Rabs
       (Rabs (/ INR (fact (2 * S n + 1)) * r ^ (2 * S n)) /
         Rabs (/ INR (fact (2 * n + 1)) * r ^ (2 * n)))) with
-    (Rsqr r *
+    (r ^ 2 *
       Rabs
       ((-1) ^ S n / INR (fact (2 * S n + 1)) /
         ((-1) ^ n / INR (fact (2 * n + 1))))).
-  apply Rmult_lt_reg_l with (/ Rsqr r).
+  apply Rmult_lt_reg_l with (/ (r ^ 2)).
   apply Rinv_0_lt_compat; apply Rsqr_pos_lt; assumption.
-  pattern (/ Rsqr r) at 1; rewrite <- (Rabs_right (/ Rsqr r)).
+  pattern (/ r ^ 2) at 1; rewrite <- (Rabs_right (/ r ^ 2)).
   rewrite <- Rabs_mult.
   rewrite Rmult_minus_distr_l.
   rewrite Rmult_0_r; rewrite <- Rmult_assoc; rewrite <- Rinv_l_sym.
   rewrite Rmult_1_l; rewrite <- (Rmult_comm eps).
   apply H6.
-  unfold Rsqr; apply prod_neq_R0; assumption.
+  rewrite !Rsqr_def; apply prod_neq_R0; assumption.
   apply Rle_ge; left; apply Rinv_0_lt_compat; apply Rsqr_pos_lt; assumption.
-  unfold Rdiv; rewrite (Rmult_comm (Rsqr r)); repeat rewrite Rabs_mult;
+  unfold Rdiv; rewrite (Rmult_comm (r ^ 2)); repeat rewrite Rabs_mult;
     rewrite Rabs_Rabsolu; rewrite pow_1_abs.
   rewrite Rmult_1_l.
   repeat rewrite Rmult_assoc; apply Rmult_eq_compat_l.
@@ -128,7 +128,7 @@ Proof.
   replace (r ^ (2 * S n)) with (r ^ (2 * n) * r * r).
   do 2 rewrite <- Rmult_assoc.
   rewrite <- Rinv_l_sym.
-  unfold Rsqr; ring.
+  ring.
   apply pow_nonzero; assumption.
   replace (2 * S n)%nat with (S (S (2 * n))).
   simpl; ring.
@@ -179,7 +179,7 @@ Proof.
   apply H8.
   unfold SFL, sin.
   case (cv h) as (x,HUn).
-  case (exist_sin (Rsqr h)) as (x0,Hsin).
+  case (exist_sin (h ^ 2)) as (x0,Hsin).
   unfold Rdiv; rewrite (Rinv_r_simpl_m h x0 H6).
   eapply UL_sequence.
   apply HUn.
@@ -191,10 +191,10 @@ Proof.
   replace
   (sum_f_R0 (fun k:nat => (-1) ^ k / INR (fact (2 * k + 1)) * h ^ (2 * k)) n)
     with
-      (sum_f_R0 (fun i:nat => (-1) ^ i / INR (fact (2 * i + 1)) * Rsqr h ^ i) n).
+      (sum_f_R0 (fun i:nat => (-1) ^ i / INR (fact (2 * i + 1)) * (h ^ 2) ^ i) n).
   apply H11; assumption.
-  apply sum_eq; intros; apply Rmult_eq_compat_l; unfold Rsqr;
-    rewrite pow_sqr; reflexivity.
+  apply sum_eq; intros; apply Rmult_eq_compat_l;
+    rewrite !Rsqr_def, pow_sqr; reflexivity.
   unfold SFL, sin.
   case (cv 0) as (?,HUn).
   eapply UL_sequence.
@@ -251,12 +251,12 @@ Proof.
   cut (0 < Rmin del del_c).
   intro; set (delta := mkposreal _ H6).
   exists delta; intros.
-  rewrite Rplus_0_l; replace (cos h - cos 0) with (-2 * Rsqr (sin (h / 2))).
+  rewrite Rplus_0_l; replace (cos h - cos 0) with (-2 * (sin (h / 2)) ^ 2).
   unfold Rminus; rewrite Ropp_0; rewrite Rplus_0_r.
   change (-2) with (-(2)).
   unfold Rdiv; do 2 rewrite Ropp_mult_distr_l_reverse.
   rewrite Rabs_Ropp.
-  replace (2 * Rsqr (sin (h * / 2)) * / h) with
+  replace (2 * (sin (h * / 2)) ^ 2 * / h) with
   (sin (h / 2) * (sin (h / 2) / (h / 2) - 1) + sin (h / 2)).
   apply Rle_lt_trans with
     (Rabs (sin (h / 2) * (sin (h / 2) / (h / 2) - 1)) + Rabs (sin (h / 2))).
@@ -321,7 +321,7 @@ Proof.
   apply Rinv_0_lt_compat; prove_sup0.
   rewrite Rmult_minus_distr_l; rewrite Rmult_1_r; unfold Rminus;
     rewrite Rplus_assoc; rewrite Rplus_opp_l; rewrite Rplus_0_r;
-      rewrite (Rmult_comm 2); unfold Rdiv, Rsqr.
+      rewrite (Rmult_comm 2); unfold Rdiv; rewrite !Rsqr_def.
   repeat rewrite Rmult_assoc.
   repeat apply Rmult_eq_compat_l.
   rewrite Rinv_mult_distr.
@@ -332,7 +332,7 @@ Proof.
   apply Rinv_neq_0_compat; discrR.
   pattern h at 2; replace h with (2 * (h / 2)).
   rewrite (cos_2a_sin (h / 2)).
-  rewrite cos_0; unfold Rsqr; ring.
+  rewrite cos_0; ring.
   unfold Rdiv; rewrite <- Rmult_assoc; apply Rinv_r_simpl_m.
   discrR.
   unfold Rmin; case (Rle_dec del del_c); intro.

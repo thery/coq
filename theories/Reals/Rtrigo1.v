@@ -26,8 +26,7 @@ Require Import PSeries_reg.
 Local Open Scope nat_scope.
 Local Open Scope R_scope.
 
-Lemma CVN_R_cos :
-  forall fn:nat -> R -> R,
+Lemma CVN_R_cos (fn:nat -> R -> R) :
     fn = (fun (N:nat) (x:R) => (-1) ^ N / INR (fact (2 * N)) * x ^ (2 * N)) ->
     CVN_R fn.
 Proof.
@@ -64,7 +63,7 @@ Proof.
   apply pow_nonzero; assumption.
   assert (H0 := Alembert_cos).
   unfold cos_n in H0; unfold Un_cv in H0; unfold Un_cv in |- *; intros.
-  cut (0 < eps / Rsqr r).
+  cut (0 < eps / (r ^ 2)).
   intro; elim (H0 _ H2); intros N0 H3.
   exists N0; intros.
   unfold R_dist in |- *; assert (H5 := H3 _ H4).
@@ -73,21 +72,21 @@ Proof.
     (Rabs
       (Rabs (/ INR (fact (2 * S n)) * r ^ (2 * S n)) /
         Rabs (/ INR (fact (2 * n)) * r ^ (2 * n)))) with
-    (Rsqr r *
+    ((r ^ 2) *
       Rabs ((-1) ^ S n / INR (fact (2 * S n)) / ((-1) ^ n / INR (fact (2 * n))))).
-  apply Rmult_lt_reg_l with (/ Rsqr r).
+  apply Rmult_lt_reg_l with (/ (r ^ 2)).
   apply Rinv_0_lt_compat; apply Rsqr_pos_lt; assumption.
-  pattern (/ Rsqr r) at 1 in |- *; replace (/ Rsqr r) with (Rabs (/ Rsqr r)).
+  pattern (/ (r ^ 2)) at 1 in |- *; replace (/ (r ^ 2)) with (Rabs (/ (r ^ 2))).
   rewrite <- Rabs_mult; rewrite Rmult_minus_distr_l; rewrite Rmult_0_r;
     rewrite <- Rmult_assoc; rewrite <- Rinv_l_sym.
   rewrite Rmult_1_l; rewrite <- (Rmult_comm eps); apply H5.
-  unfold Rsqr in |- *; apply prod_neq_R0; assumption.
+  now contradict hyp_r; apply Rsqr_eq_0.
   rewrite Rabs_Rinv.
   rewrite Rabs_right.
   reflexivity.
   apply Rle_ge; apply Rle_0_sqr.
-  unfold Rsqr in |- *; apply prod_neq_R0; assumption.
-  rewrite (Rmult_comm (Rsqr r)); unfold Rdiv in |- *; repeat rewrite Rabs_mult;
+  now contradict hyp_r; apply Rsqr_eq_0.
+  rewrite (Rmult_comm (r ^ 2)); unfold Rdiv in |- *; repeat rewrite Rabs_mult;
     rewrite Rabs_Rabsolu; rewrite pow_1_abs; rewrite Rmult_1_l;
       repeat rewrite Rmult_assoc; apply Rmult_eq_compat_l.
   rewrite Rabs_Rinv.
@@ -103,7 +102,7 @@ Proof.
   do 2 rewrite Rabs_Rabsolu; repeat rewrite Rabs_right.
   replace (r ^ (2 * S n)) with (r ^ (2 * n) * r * r).
   repeat rewrite <- Rmult_assoc; rewrite <- Rinv_l_sym.
-  unfold Rsqr in |- *; ring.
+  ring.
   apply pow_nonzero; assumption.
   replace (2 * S n)%nat with (S (S (2 * n))).
   simpl in |- *; ring.
@@ -149,7 +148,7 @@ Proof.
   apply H4.
   intros; rewrite (H0 x); rewrite (H0 x1); apply H5; apply H6.
   intro; unfold cos, SFL in |- *.
-  case (cv x) as (x1,HUn); case (exist_cos (Rsqr x)) as (x0,Hcos); intros.
+  case (cv x) as (x1,HUn); case (exist_cos (x ^ 2)) as (x0,Hcos); intros.
   symmetry; eapply UL_sequence.
   apply HUn.
   unfold cos_in, infinite_sum in Hcos; unfold Un_cv in |- *; intros.
@@ -157,11 +156,11 @@ Proof.
   exists N0; intros.
   unfold R_dist in H1; unfold R_dist, SP in |- *.
   replace (sum_f_R0 (fun k:nat => fn k x) n) with
-  (sum_f_R0 (fun i:nat => cos_n i * Rsqr x ^ i) n).
+  (sum_f_R0 (fun i:nat => cos_n i * (x ^ 2) ^ i) n).
   apply H1; assumption.
   apply sum_eq; intros.
   unfold cos_n, fn in |- *; apply Rmult_eq_compat_l.
-  unfold Rsqr in |- *; rewrite pow_sqr; reflexivity.
+  rewrite pow_Rsqr; reflexivity.
   intro; unfold fn in |- *;
     replace (fun x:R => (-1) ^ n / INR (fact (2 * n)) * x ^ (2 * n)) with
     (fct_cte ((-1) ^ n / INR (fact (2 * n))) * pow_fct (2 * n))%F;
@@ -213,7 +212,7 @@ assert (cvp : 0 < cos (7/8)).
  lra.
 assert (cun : cos (7/4) < 0).
  replace (7/4) with (7/8 + 7/8) by field.
- rewrite cos_plus.
+ rewrite cos_plus, <- !Rsqr_def.
  apply Rlt_minus; apply Rsqr_incrst_1.
    exact sin_gt_cos_7_8.
   apply Rlt_le; assumption.
@@ -235,27 +234,27 @@ unfold PI2; case PI_2_aux; simpl; tauto.
 Qed.
 
 (**********)
-Lemma cos_minus : forall x y:R, cos (x - y) = cos x * cos y + sin x * sin y.
+Lemma cos_minus x y : cos (x - y) = cos x * cos y + sin x * sin y.
 Proof.
-  intros; unfold Rminus in |- *; rewrite cos_plus.
+  unfold Rminus in |- *; rewrite cos_plus.
   rewrite <- cos_sym; rewrite sin_antisym; ring.
 Qed.
 
 (**********)
-Lemma sin2_cos2 : forall x:R, Rsqr (sin x) + Rsqr (cos x) = 1.
+Lemma sin2_cos2 x : (sin x) ^ 2 + (cos x) ^ 2 = 1.
 Proof.
-  intro; unfold Rsqr in |- *; rewrite Rplus_comm; rewrite <- (cos_minus x x);
+  rewrite Rplus_comm, !Rsqr_def; rewrite <- (cos_minus x x);
     unfold Rminus in |- *; rewrite Rplus_opp_r; apply cos_0.
 Qed.
 
-Lemma cos2 : forall x:R, Rsqr (cos x) = 1 - Rsqr (sin x).
+Lemma cos2 x : (cos x) ^ 2 = 1 - (sin x) ^ 2.
 Proof.
-  intros x; rewrite <- (sin2_cos2 x); ring.
+  rewrite <- (sin2_cos2 x); ring.
 Qed.
 
-Lemma sin2 : forall x:R, Rsqr (sin x) = 1 - Rsqr (cos x).
+Lemma sin2 x : (sin x) ^ 2 = 1 - (cos x) ^ 2.
 Proof.
-  intro x; generalize (cos2 x); intro H1; rewrite H1.
+  generalize (cos2 x); intro H1; rewrite H1.
   unfold Rminus in |- *; rewrite Ropp_plus_distr; rewrite <- Rplus_assoc;
     rewrite Rplus_opp_r; rewrite Rplus_0_l; symmetry  in |- *;
       apply Ropp_involutive.
@@ -267,8 +266,8 @@ Proof.
  unfold PI; generalize cos_pi2; replace ((2 * PI2)/2) with PI2 by field; tauto.
 Qed.
 
-Lemma sin_pos_tech : forall x, 0 < x < 2 -> 0 < sin x. 
-intros x [int1 int2].
+Lemma sin_pos_tech x : 0 < x < 2 -> 0 < sin x.
+intros [int1 int2].
 assert (lo : 0 <= x) by (apply Rlt_le; assumption).
 assert (up : x <= 4) by (apply Rlt_le, Rlt_trans with (1:=int2); lra).
 destruct (pre_sin_bound _ 0 lo up) as [t _]; clear lo up.
@@ -307,7 +306,6 @@ Proof.
     elim (Rlt_irrefl _ H0).
 Qed.
 
-
 (**********)
 Lemma cos_PI : cos PI = -1.
 Proof.
@@ -325,24 +323,24 @@ Proof.
   change (-1) with (-(1)) in H.
   rewrite <- Rsqr_neg in H.
   rewrite Rsqr_1 in H.
-  cut (Rsqr (sin PI) = 0).
+  cut ((sin PI) ^ 2 = 0).
   intro; apply (Rsqr_eq_0 _ H0).
   apply Rplus_eq_reg_l with 1.
   rewrite Rplus_0_r; rewrite Rplus_comm; exact H.
 Qed.
 
-Lemma sin_bound : forall (a : R) (n : nat), 0 <= a -> a <= PI ->
+Lemma sin_bound a n : 0 <= a -> a <= PI ->
        sin_approx a (2 * n + 1) <= sin a <= sin_approx a (2 * (n + 1)).
 Proof.
-intros a n a0 api; apply pre_sin_bound.
+intros a0 api; apply pre_sin_bound.
  assumption.
 apply Rle_trans with (1:= api) (2 := PI_4).
 Qed.
 
-Lemma cos_bound : forall (a : R) (n : nat), - PI / 2 <= a -> a <= PI / 2 ->
+Lemma cos_bound a n : - PI / 2 <= a -> a <= PI / 2 ->
        cos_approx a (2 * n + 1) <= cos a <= cos_approx a (2 * (n + 1)).
 Proof.
-intros a n lower upper; apply pre_cos_bound.
+intros lower upper; apply pre_cos_bound.
  apply Rle_trans with (2 := lower).
  apply Rmult_le_reg_r with 2; [lra |].
  replace ((-PI/2) * 2) with (-PI) by field.
@@ -353,19 +351,19 @@ replace ((PI/2) * 2) with PI by field.
 generalize PI_4; intros; lra.
 Qed.
 (**********)
-Lemma neg_cos : forall x:R, cos (x + PI) = - cos x.
+Lemma neg_cos x : cos (x + PI) = - cos x.
 Proof.
-  intro x; rewrite cos_plus; rewrite sin_PI; rewrite cos_PI; ring.
+  rewrite cos_plus; rewrite sin_PI; rewrite cos_PI; ring.
 Qed.
 
 (**********)
-Lemma sin_cos : forall x:R, sin x = - cos (PI / 2 + x).
+Lemma sin_cos x : sin x = - cos (PI / 2 + x).
 Proof.
-  intro x; rewrite cos_plus; rewrite sin_PI2; rewrite cos_PI2; ring.
+  rewrite cos_plus; rewrite sin_PI2; rewrite cos_PI2; ring.
 Qed.
 
 (**********)
-Lemma sin_plus : forall x y:R, sin (x + y) = sin x * cos y + cos x * sin y.
+Lemma sin_plus x y : sin (x + y) = sin x * cos y + cos x * sin y.
 Proof.
   intros.
   rewrite (sin_cos (x + y)).
@@ -379,7 +377,7 @@ Proof.
   pattern PI at 1 in |- *; rewrite (double_var PI); ring.
 Qed.
 
-Lemma sin_minus : forall x y:R, sin (x - y) = sin x * cos y - cos x * sin y.
+Lemma sin_minus x y : sin (x - y) = sin x * cos y - cos x * sin y.
 Proof.
   intros; unfold Rminus in |- *; rewrite sin_plus.
   rewrite <- cos_sym; rewrite sin_antisym; ring.
@@ -388,8 +386,7 @@ Qed.
 (**********)
 Definition tan (x:R) : R := sin x / cos x.
 
-Lemma tan_plus :
-  forall x y:R,
+Lemma tan_plus x y :
     cos x <> 0 ->
     cos y <> 0 ->
     cos (x + y) <> 0 ->
@@ -431,50 +428,49 @@ Qed.
 (** * Some properties of cos, sin and tan              *)
 (*******************************************************)
 
-Lemma sin_2a : forall x:R, sin (2 * x) = 2 * sin x * cos x.
+Lemma sin_2a x : sin (2 * x) = 2 * sin x * cos x.
 Proof.
-  intro x; rewrite double; rewrite sin_plus.
+  rewrite double; rewrite sin_plus.
   rewrite <- (Rmult_comm (sin x)); symmetry  in |- *; rewrite Rmult_assoc;
     apply double.
 Qed.
 
-Lemma cos_2a : forall x:R, cos (2 * x) = cos x * cos x - sin x * sin x.
+Lemma cos_2a x : cos (2 * x) = cos x * cos x - sin x * sin x.
 Proof.
-  intro x; rewrite double; apply cos_plus.
+  rewrite double; apply cos_plus.
 Qed.
 
-Lemma cos_2a_cos : forall x:R, cos (2 * x) = 2 * cos x * cos x - 1.
+Lemma cos_2a_cos x : cos (2 * x) = 2 * cos x * cos x - 1.
 Proof.
-  intro x; rewrite double; unfold Rminus in |- *; rewrite Rmult_assoc;
+  rewrite double; unfold Rminus in |- *; rewrite Rmult_assoc;
     rewrite cos_plus; generalize (sin2_cos2 x); rewrite double;
-      intro H1; rewrite <- H1; ring_Rsqr.
+      intro H1; rewrite <- H1; ring.
 Qed.
 
-Lemma cos_2a_sin : forall x:R, cos (2 * x) = 1 - 2 * sin x * sin x.
+Lemma cos_2a_sin x : cos (2 * x) = 1 - 2 * sin x * sin x.
 Proof.
-  intro x; rewrite Rmult_assoc; unfold Rminus in |- *; repeat rewrite double.
+  rewrite Rmult_assoc; unfold Rminus in |- *; repeat rewrite double.
   generalize (sin2_cos2 x); intro H1; rewrite <- H1; rewrite cos_plus;
-    ring_Rsqr.
+    ring.
 Qed.
 
-Lemma tan_2a :
-  forall x:R,
+Lemma tan_2a x :
     cos x <> 0 ->
     cos (2 * x) <> 0 ->
     1 - tan x * tan x <> 0 -> tan (2 * x) = 2 * tan x / (1 - tan x * tan x).
 Proof.
-  repeat rewrite double; intros; repeat rewrite double; rewrite double in H0;
+  repeat rewrite double; intros; repeat rewrite double.
     apply tan_plus; assumption.
 Qed.
 
-Lemma sin_neg : forall x:R, sin (- x) = - sin x.
+Lemma sin_neg x : sin (- x) = - sin x.
 Proof.
   apply sin_antisym.
 Qed.
 
-Lemma cos_neg : forall x:R, cos (- x) = cos x.
+Lemma cos_neg x : cos (- x) = cos x.
 Proof.
-  intro; symmetry  in |- *; apply cos_sym.
+  symmetry  in |- *; apply cos_sym.
 Qed.
 
 Lemma tan_0 : tan 0 = 0.
@@ -483,15 +479,14 @@ Proof.
   unfold Rdiv in |- *; apply Rmult_0_l.
 Qed.
 
-Lemma tan_neg : forall x:R, tan (- x) = - tan x.
+Lemma tan_neg x : tan (- x) = - tan x.
 Proof.
-  intros x; unfold tan in |- *; rewrite sin_neg; rewrite cos_neg;
+  unfold tan in |- *; rewrite sin_neg; rewrite cos_neg;
     unfold Rdiv in |- *.
   apply Ropp_mult_distr_l_reverse.
 Qed.
 
-Lemma tan_minus :
-  forall x y:R,
+Lemma tan_minus x y :
     cos x <> 0 ->
     cos y <> 0 ->
     cos (x - y) <> 0 ->
@@ -526,20 +521,20 @@ Proof.
   rewrite cos_2a; rewrite sin_PI; rewrite cos_PI; ring.
 Qed.
 
-Lemma neg_sin : forall x:R, sin (x + PI) = - sin x.
+Lemma neg_sin x : sin (x + PI) = - sin x.
 Proof.
-  intro x; rewrite sin_plus; rewrite sin_PI; rewrite cos_PI; ring.
+  rewrite sin_plus; rewrite sin_PI; rewrite cos_PI; ring.
 Qed.
 
-Lemma sin_PI_x : forall x:R, sin (PI - x) = sin x.
+Lemma sin_PI_x x : sin (PI - x) = sin x.
 Proof.
-  intro x; rewrite sin_minus; rewrite sin_PI; rewrite cos_PI.
+  rewrite sin_minus; rewrite sin_PI; rewrite cos_PI.
   ring.
 Qed.
 
-Lemma sin_period : forall (x:R) (k:nat), sin (x + 2 * INR k * PI) = sin x.
+Lemma sin_period x k : sin (x + 2 * INR k * PI) = sin x.
 Proof.
-  intros x k; induction  k as [| k Hreck].
+  induction  k as [| k Hreck].
   simpl in |- *;  ring_simplify (x + 2 * 0 * PI).
   trivial.
 
@@ -549,9 +544,9 @@ Proof.
   rewrite S_INR in |- *;  ring.
 Qed.
 
-Lemma cos_period : forall (x:R) (k:nat), cos (x + 2 * INR k * PI) = cos x.
+Lemma cos_period x k : cos (x + 2 * INR k * PI) = cos x.
 Proof.
-  intros x k; induction  k as [| k Hreck].
+  induction  k as [| k Hreck].
   simpl in |- *;  ring_simplify (x + 2 * 0 * PI).
   trivial.
 
@@ -561,19 +556,19 @@ Proof.
   rewrite S_INR in |- *;  ring.
 Qed.
 
-Lemma sin_shift : forall x:R, sin (PI / 2 - x) = cos x.
+Lemma sin_shift x : sin (PI / 2 - x) = cos x.
 Proof.
-  intro x; rewrite sin_minus; rewrite sin_PI2; rewrite cos_PI2; ring.
+  rewrite sin_minus; rewrite sin_PI2; rewrite cos_PI2; ring.
 Qed.
 
-Lemma cos_shift : forall x:R, cos (PI / 2 - x) = sin x.
+Lemma cos_shift x : cos (PI / 2 - x) = sin x.
 Proof.
-  intro x; rewrite cos_minus; rewrite sin_PI2; rewrite cos_PI2; ring.
+  rewrite cos_minus; rewrite sin_PI2; rewrite cos_PI2; ring.
 Qed.
 
-Lemma cos_sin : forall x:R, cos x = sin (PI / 2 + x).
+Lemma cos_sin x : cos x = sin (PI / 2 + x).
 Proof.
-  intro x; rewrite sin_plus; rewrite sin_PI2; rewrite cos_PI2; ring.
+  rewrite sin_plus; rewrite sin_PI2; rewrite cos_PI2; ring.
 Qed.
 
 Lemma PI2_RGT_0 : 0 < PI / 2.
@@ -582,9 +577,9 @@ Proof.
     [ apply PI_RGT_0 | apply Rinv_0_lt_compat; prove_sup ].
 Qed.
 
-Lemma SIN_bound : forall x:R, -1 <= sin x <= 1.
+Lemma SIN_bound x : -1 <= sin x <= 1.
 Proof.
-  intro; destruct (Rle_dec (-1) (sin x)) as [Hle|Hnle].
+  destruct (Rle_dec (-1) (sin x)) as [Hle|Hnle].
   destruct (Rle_dec (sin x) 1) as [Hle'|Hnle'].
   split; assumption.
   cut (1 < sin x).
@@ -593,12 +588,12 @@ Proof.
       (Rsqr_incrst_1 1 (sin x) H (Rlt_le 0 1 Rlt_0_1)
         (Rlt_le 0 (sin x) (Rlt_trans 0 1 (sin x) Rlt_0_1 H)));
       rewrite Rsqr_1; intro; rewrite sin2 in H0; unfold Rminus in H0.
-        generalize (Rplus_lt_compat_l (-1) 1 (1 + - Rsqr (cos x)) H0);
+        generalize (Rplus_lt_compat_l (-1) 1 (1 + - (cos x) ^ 2) H0);
           repeat rewrite <- Rplus_assoc; change (-1) with (-(1)); rewrite Rplus_opp_l;
             rewrite Rplus_0_l; intro; rewrite <- Ropp_0 in H1;
-              generalize (Ropp_lt_gt_contravar (-0) (- Rsqr (cos x)) H1);
+              generalize (Ropp_lt_gt_contravar (-0) (- (cos x) ^ 2) H1);
                 repeat rewrite Ropp_involutive; intro; generalize (Rle_0_sqr (cos x));
-                  intro; elim (Rlt_irrefl 0 (Rle_lt_trans 0 (Rsqr (cos x)) 0 H3 H2)).
+                  intro; elim (Rlt_irrefl 0 (Rle_lt_trans 0 ((cos x) ^ 2) 0 H3 H2)).
   auto with real.
   cut (sin x < -1).
   intro; generalize (Ropp_lt_gt_contravar (sin x) (-1) H);
@@ -609,31 +604,30 @@ Proof.
           (Rlt_le 0 (- sin x) (Rlt_trans 0 1 (- sin x) Rlt_0_1 H)));
         rewrite Rsqr_1; intro; rewrite <- Rsqr_neg in H0;
           rewrite sin2 in H0; unfold Rminus in H0;
-            generalize (Rplus_lt_compat_l (-1) 1 (1 + - Rsqr (cos x)) H0);
+            generalize (Rplus_lt_compat_l (-1) 1 (1 + - (cos x) ^ 2) H0);
               rewrite <- Rplus_assoc; change (-1) with (-(1)); rewrite Rplus_opp_l;
                 rewrite Rplus_0_l; intro; rewrite <- Ropp_0 in H1;
-                  generalize (Ropp_lt_gt_contravar (-0) (- Rsqr (cos x)) H1);
+                  generalize (Ropp_lt_gt_contravar (-0) (- (cos x) ^ 2) H1);
                     repeat rewrite Ropp_involutive; intro; generalize (Rle_0_sqr (cos x));
-                      intro; elim (Rlt_irrefl 0 (Rle_lt_trans 0 (Rsqr (cos x)) 0 H3 H2)).
+                      intro; elim (Rlt_irrefl 0 (Rle_lt_trans 0 ((cos x) ^ 2) 0 H3 H2)).
   auto with real.
 Qed.
 
-Lemma COS_bound : forall x:R, -1 <= cos x <= 1.
+Lemma COS_bound x : -1 <= cos x <= 1.
 Proof.
-  intro; rewrite <- sin_shift; apply SIN_bound.
+  rewrite <- sin_shift; apply SIN_bound.
 Qed.
 
-Lemma cos_sin_0 : forall x:R, ~ (cos x = 0 /\ sin x = 0).
+Lemma cos_sin_0 x : ~ (cos x = 0 /\ sin x = 0).
 Proof.
-  intro; red in |- *; intro; elim H; intros; generalize (sin2_cos2 x); intro;
+  red in |- *; intro; elim H; intros; generalize (sin2_cos2 x); intro;
     rewrite H0 in H2; rewrite H1 in H2; repeat rewrite Rsqr_0 in H2;
       rewrite Rplus_0_r in H2; generalize Rlt_0_1; intro;
         rewrite <- H2 in H3; elim (Rlt_irrefl 0 H3).
 Qed.
 
-Lemma cos_sin_0_var : forall x:R, cos x <> 0 \/ sin x <> 0.
+Lemma cos_sin_0_var x : cos x <> 0 \/ sin x <> 0.
 Proof.
-  intros x.
   destruct (Req_dec (cos x) 0). 2: now left.
   right. intros H'.
   apply (cos_sin_0 x).
@@ -649,7 +643,7 @@ Definition sin_ub (a:R) : R := sin_approx a 4.
 Definition cos_lb (a:R) : R := cos_approx a 3.
 Definition cos_ub (a:R) : R := cos_approx a 4.
 
-Lemma sin_lb_gt_0 : forall a:R, 0 < a -> a <= PI / 2 -> 0 < sin_lb a.
+Lemma sin_lb_gt_0 a : 0 < a -> a <= PI / 2 -> 0 < sin_lb a.
 Proof.
   intros.
   unfold sin_lb in |- *; unfold sin_approx in |- *; unfold sin_term in |- *.
@@ -697,7 +691,7 @@ Proof.
   do 2 rewrite Rmult_1_r; apply Rle_lt_trans with (INR (fact (2 * n + 1)) * 4).
   apply Rmult_le_compat_l.
   apply pos_INR.
-  simpl in |- *; rewrite Rmult_1_r; change 4 with (Rsqr 2);
+  replace 4 with (2 ^ 2) by ring;
     apply Rsqr_incr_1.
   apply Rle_trans with (PI / 2);
     [ assumption
@@ -734,13 +728,12 @@ Proof.
   ring.
 Qed.
 
-Lemma SIN : forall a:R, 0 <= a -> a <= PI -> sin_lb a <= sin a <= sin_ub a.
+Lemma SIN a : 0 <= a -> a <= PI -> sin_lb a <= sin a <= sin_ub a.
 Proof.
   intros; unfold sin_lb, sin_ub in |- *; apply (sin_bound a 1 H H0).
 Qed.
 
-Lemma COS :
-  forall a:R, - PI / 2 <= a -> a <= PI / 2 -> cos_lb a <= cos a <= cos_ub a.
+Lemma COS a : - PI / 2 <= a -> a <= PI / 2 -> cos_lb a <= cos a <= cos_ub a.
 Proof.
   intros; unfold cos_lb, cos_ub in |- *; apply (cos_bound a 1 H H0).
 Qed.
@@ -767,7 +760,7 @@ Qed.
 (***************************************************)
 (** * Increasing and decreasing of [cos] and [sin] *)
 (***************************************************)
-Theorem sin_gt_0 : forall x:R, 0 < x -> x < PI -> 0 < sin x.
+Theorem sin_gt_0 x : 0 < x -> x < PI -> 0 < sin x.
 Proof.
   intros; elim (SIN x (Rlt_le 0 x H) (Rlt_le x PI H0)); intros H1 _;
     case (Rtotal_order x (PI / 2)); intro H2.
@@ -836,9 +829,9 @@ Proof.
           | unfold INR in |- *; ring ].
 Qed.
 
-Lemma cos_le_0 : forall x:R, PI / 2 <= x -> x <= 3 * (PI / 2) -> cos x <= 0.
+Lemma cos_le_0 x : PI / 2 <= x -> x <= 3 * (PI / 2) -> cos x <= 0.
 Proof.
-  intros x H1 H2; apply Rge_le; rewrite <- Ropp_0;
+  intros H1 H2; apply Rge_le; rewrite <- Ropp_0;
     rewrite <- (Ropp_involutive (cos x)); apply Ropp_le_ge_contravar;
       rewrite <- neg_cos; replace (x + PI) with (x - PI + 2 * INR 1 * PI).
   rewrite cos_period; apply cos_ge_0.
@@ -851,9 +844,9 @@ Proof.
   unfold INR in |- *; ring.
 Qed.
 
-Lemma sin_lt_0 : forall x:R, PI < x -> x < 2 * PI -> sin x < 0.
+Lemma sin_lt_0 x : PI < x -> x < 2 * PI -> sin x < 0.
 Proof.
-  intros x H1 H2; rewrite <- Ropp_0; rewrite <- (Ropp_involutive (sin x));
+  intros H1 H2; rewrite <- Ropp_0; rewrite <- (Ropp_involutive (sin x));
     apply Ropp_lt_gt_contravar; rewrite <- neg_sin;
       replace (x + PI) with (x - PI + 2 * INR 1 * PI);
       [ rewrite (sin_period (x - PI) 1); apply sin_gt_0;
@@ -868,7 +861,7 @@ Proof.
         | unfold INR in |- *; ring ].
 Qed.
 
-Lemma sin_lt_0_var : forall x:R, - PI < x -> x < 0 -> sin x < 0.
+Lemma sin_lt_0_var x : - PI < x -> x < 0 -> sin x < 0.
 Proof.
   intros; generalize (Rplus_lt_compat_l (2 * PI) (- PI) x H);
     replace (2 * PI + - PI) with PI;
@@ -882,9 +875,9 @@ Proof.
       | ring ].
 Qed.
 
-Lemma cos_lt_0 : forall x:R, PI / 2 < x -> x < 3 * (PI / 2) -> cos x < 0.
+Lemma cos_lt_0 x : PI / 2 < x -> x < 3 * (PI / 2) -> cos x < 0.
 Proof.
-  intros x H1 H2; rewrite <- Ropp_0; rewrite <- (Ropp_involutive (cos x));
+  intros H1 H2; rewrite <- Ropp_0; rewrite <- (Ropp_involutive (cos x));
     apply Ropp_lt_gt_contravar; rewrite <- neg_cos;
       replace (x + PI) with (x - PI + 2 * INR 1 * PI).
   rewrite cos_period; apply cos_gt_0.
@@ -897,9 +890,9 @@ Proof.
   unfold INR in |- *; ring.
 Qed.
 
-Lemma tan_gt_0 : forall x:R, 0 < x -> x < PI / 2 -> 0 < tan x.
+Lemma tan_gt_0 x : 0 < x -> x < PI / 2 -> 0 < tan x.
 Proof.
-  intros x H1 H2; unfold tan in |- *; generalize _PI2_RLT_0;
+  intros H1 H2; unfold tan in |- *; generalize _PI2_RLT_0;
     generalize (Rlt_trans 0 x (PI / 2) H1 H2); intros;
       generalize (Rlt_trans (- (PI / 2)) 0 x H0 H1); intro H5;
         generalize (Rlt_trans x (PI / 2) PI H2 PI2_Rlt_PI);
@@ -908,9 +901,9 @@ Proof.
   apply Rinv_0_lt_compat; apply cos_gt_0; assumption.
 Qed.
 
-Lemma tan_lt_0 : forall x:R, - (PI / 2) < x -> x < 0 -> tan x < 0.
+Lemma tan_lt_0 x : - (PI / 2) < x -> x < 0 -> tan x < 0.
 Proof.
-  intros x H1 H2; unfold tan in |- *;
+  intros H1 H2; unfold tan in |- *;
     generalize (cos_gt_0 x H1 (Rlt_trans x 0 (PI / 2) H2 PI2_RGT_0));
       intro H3; rewrite <- Ropp_0;
         replace (sin x / cos x) with (- (- sin x / cos x)).
@@ -926,8 +919,8 @@ Proof.
   unfold Rdiv in |- *; ring.
 Qed.
 
-Lemma cos_ge_0_3PI2 :
-  forall x:R, 3 * (PI / 2) <= x -> x <= 2 * PI -> 0 <= cos x.
+Lemma cos_ge_0_3PI2 x :
+  3 * (PI / 2) <= x -> x <= 2 * PI -> 0 <= cos x.
 Proof.
   intros; rewrite <- cos_neg; rewrite <- (cos_period (- x) 1);
     unfold INR in |- *; replace (- x + 2 * 1 * PI) with (2 * PI - x) by ring.
@@ -947,28 +940,25 @@ Proof.
           (Rlt_le_trans (- (PI / 2)) 0 (2 * PI - x) _PI2_RLT_0 H2)) H4).
 Qed.
 
-Lemma form1 :
-  forall p q:R, cos p + cos q = 2 * cos ((p - q) / 2) * cos ((p + q) / 2).
+Lemma form1 p q : cos p + cos q = 2 * cos ((p - q) / 2) * cos ((p + q) / 2).
 Proof.
-  intros p q; pattern p at 1 in |- *;
+  pattern p at 1 in |- *;
     replace p with ((p - q) / 2 + (p + q) / 2) by field.
   rewrite <- (cos_neg q); replace (- q) with ((p - q) / 2 - (p + q) / 2) by field.
   rewrite cos_plus; rewrite cos_minus; ring.
 Qed.
 
-Lemma form2 :
-  forall p q:R, cos p - cos q = -2 * sin ((p - q) / 2) * sin ((p + q) / 2).
+Lemma form2  p q : cos p - cos q = -2 * sin ((p - q) / 2) * sin ((p + q) / 2).
 Proof.
-  intros p q; pattern p at 1 in |- *;
+  pattern p at 1 in |- *;
     replace p with ((p - q) / 2 + (p + q) / 2) by field.
   rewrite <- (cos_neg q); replace (- q) with ((p - q) / 2 - (p + q) / 2) by field.
   rewrite cos_plus; rewrite cos_minus; ring.
 Qed.
 
-Lemma form3 :
-  forall p q:R, sin p + sin q = 2 * cos ((p - q) / 2) * sin ((p + q) / 2).
+Lemma form3 p q : sin p + sin q = 2 * cos ((p - q) / 2) * sin ((p + q) / 2).
 Proof.
-  intros p q; pattern p at 1 in |- *;
+  pattern p at 1 in |- *;
     replace p with ((p - q) / 2 + (p + q) / 2).
   pattern q at 3 in |- *; replace q with ((p + q) / 2 - (p - q) / 2).
   rewrite sin_plus; rewrite sin_minus; ring.
@@ -976,18 +966,16 @@ Proof.
   pattern p at 3 in |- *; rewrite double_var; unfold Rdiv in |- *; ring.
 Qed.
 
-Lemma form4 :
-  forall p q:R, sin p - sin q = 2 * cos ((p + q) / 2) * sin ((p - q) / 2).
+Lemma form4 p q : sin p - sin q = 2 * cos ((p + q) / 2) * sin ((p - q) / 2).
 Proof.
-  intros p q; pattern p at 1 in |- *;
+  pattern p at 1 in |- *;
     replace p with ((p - q) / 2 + (p + q) / 2) by field.
   pattern q at 3 in |- *; replace q with ((p + q) / 2 - (p - q) / 2) by field.
   rewrite sin_plus; rewrite sin_minus; ring.
 
 Qed.
 
-Lemma sin_increasing_0 :
-  forall x y:R,
+Lemma sin_increasing_0 x y :
     - (PI / 2) <= x ->
     x <= PI / 2 -> - (PI / 2) <= y -> y <= PI / 2 -> sin x < sin y -> x < y.
 Proof.
@@ -1068,8 +1056,7 @@ Proof.
       elim (Rlt_irrefl 0 H3).
 Qed.
 
-Lemma sin_increasing_1 :
-  forall x y:R,
+Lemma sin_increasing_1 x y :
     - (PI / 2) <= x ->
     x <= PI / 2 -> - (PI / 2) <= y -> y <= PI / 2 -> x < y -> sin x < sin y.
 Proof.
@@ -1127,8 +1114,7 @@ Proof.
   apply Ropp_lt_gt_contravar; apply PI2_Rlt_PI.
 Qed.
 
-Lemma sin_decreasing_0 :
-  forall x y:R,
+Lemma sin_decreasing_0 x y :
     x <= 3 * (PI / 2) ->
     PI / 2 <= x -> y <= 3 * (PI / 2) -> PI / 2 <= y -> sin x < sin y -> y < x.
 Proof.
@@ -1151,8 +1137,7 @@ Proof.
   apply (sin_increasing_0 (y - PI) (x - PI) H4 H5 H6 H7 H8).
 Qed.
 
-Lemma sin_decreasing_1 :
-  forall x y:R,
+Lemma sin_decreasing_1 x y :
     x <= 3 * (PI / 2) ->
     PI / 2 <= x -> y <= 3 * (PI / 2) -> PI / 2 <= y -> x < y -> sin y < sin x.
 Proof.
@@ -1172,11 +1157,10 @@ Proof.
   apply (sin_increasing_1 (x - PI) (y - PI) H7 H8 H5 H6 H4).
 Qed.
 
-Lemma cos_increasing_0 :
-  forall x y:R,
+Lemma cos_increasing_0 x y :
     PI <= x -> x <= 2 * PI -> PI <= y -> y <= 2 * PI -> cos x < cos y -> x < y.
 Proof.
-  intros x y H1 H2 H3 H4; rewrite <- (cos_neg x); rewrite <- (cos_neg y);
+  intros H1 H2 H3 H4; rewrite <- (cos_neg x); rewrite <- (cos_neg y);
     rewrite <- (cos_period (- x) 1); rewrite <- (cos_period (- y) 1);
       unfold INR in |- *;
         replace (- x + 2 * 1 * PI) with (PI / 2 - (x - 3 * (PI / 2))) by field.
@@ -1197,11 +1181,10 @@ Proof.
   apply (sin_increasing_0 (x - 3 * (PI / 2)) (y - 3 * (PI / 2)) H4 H3 H2 H1 H5).
 Qed.
 
-Lemma cos_increasing_1 :
-  forall x y:R,
+Lemma cos_increasing_1 x y :
     PI <= x -> x <= 2 * PI -> PI <= y -> y <= 2 * PI -> x < y -> cos x < cos y.
 Proof.
-  intros x y H1 H2 H3 H4 H5;
+  intros H1 H2 H3 H4 H5;
     generalize (Rplus_le_compat_l (-3 * (PI / 2)) PI x H1);
       generalize (Rplus_le_compat_l (-3 * (PI / 2)) x (2 * PI) H2);
         generalize (Rplus_le_compat_l (-3 * (PI / 2)) PI y H3);
@@ -1221,8 +1204,7 @@ Proof.
       (sin_increasing_1 (x - 3 * (PI / 2)) (y - 3 * (PI / 2)) H5 H4 H3 H2 H1).
 Qed.
 
-Lemma cos_decreasing_0 :
-  forall x y:R,
+Lemma cos_decreasing_0 x y :
     0 <= x -> x <= PI -> 0 <= y -> y <= PI -> cos x < cos y -> y < x.
 Proof.
   intros; generalize (Ropp_lt_gt_contravar (cos x) (cos y) H3);
@@ -1237,8 +1219,7 @@ Proof.
     apply (cos_increasing_0 (PI + y) (PI + x) H0 H H2 H1 H4).
 Qed.
 
-Lemma cos_decreasing_1 :
-  forall x y:R,
+Lemma cos_decreasing_1 x y :
     0 <= x -> x <= PI -> 0 <= y -> y <= PI -> x < y -> cos y < cos x.
 Proof.
   intros; apply Ropp_lt_cancel; repeat rewrite <- neg_cos;
@@ -1252,8 +1233,7 @@ Proof.
     apply (cos_increasing_1 (PI + x) (PI + y) H3 H2 H1 H0 H).
 Qed.
 
-Lemma tan_diff :
-  forall x y:R,
+Lemma tan_diff x y :
     cos x <> 0 -> cos y <> 0 -> tan x - tan y = sin (x - y) / (cos x * cos y).
 Proof.
   intros; unfold tan in |- *; rewrite sin_minus.
@@ -1261,8 +1241,7 @@ Proof.
   now split.
 Qed.
 
-Lemma tan_increasing_0 :
-  forall x y:R,
+Lemma tan_increasing_0 x y :
     - (PI / 4) <= x ->
     x <= PI / 4 -> - (PI / 4) <= y -> y <= PI / 4 -> tan x < tan y -> x < y.
 Proof.
@@ -1323,8 +1302,7 @@ Proof.
   assumption.
 Qed.
 
-Lemma tan_increasing_1 :
-  forall x y:R,
+Lemma tan_increasing_1 x y :
     - (PI / 4) <= x ->
     x <= PI / 4 -> - (PI / 4) <= y -> y <= PI / 4 -> x < y -> tan x < tan y.
 Proof.
@@ -1371,8 +1349,7 @@ Proof.
   apply Rinv_mult_distr; assumption.
 Qed.
 
-Lemma sin_incr_0 :
-  forall x y:R,
+Lemma sin_incr_0 x y :
     - (PI / 2) <= x ->
     x <= PI / 2 -> - (PI / 2) <= y -> y <= PI / 2 -> sin x <= sin y -> x <= y.
 Proof.
@@ -1388,8 +1365,7 @@ Proof.
           | elim (Rlt_irrefl (sin x) (Rle_lt_trans (sin x) (sin y) (sin x) H3 H5)) ] ].
 Qed.
 
-Lemma sin_incr_1 :
-  forall x y:R,
+Lemma sin_incr_1 x y :
     - (PI / 2) <= x ->
     x <= PI / 2 -> - (PI / 2) <= y -> y <= PI / 2 -> x <= y -> sin x <= sin y.
 Proof.
@@ -1405,8 +1381,7 @@ Proof.
           | elim (Rlt_irrefl x (Rle_lt_trans x y x H3 H5)) ] ].
 Qed.
 
-Lemma sin_decr_0 :
-  forall x y:R,
+Lemma sin_decr_0 x y :
     x <= 3 * (PI / 2) ->
     PI / 2 <= x ->
     y <= 3 * (PI / 2) -> PI / 2 <= y -> sin x <= sin y -> y <= x.
@@ -1422,8 +1397,7 @@ Proof.
           | elim (Rlt_irrefl (sin x) (Rle_lt_trans (sin x) (sin y) (sin x) H3 H5)) ] ].
 Qed.
 
-Lemma sin_decr_1 :
-  forall x y:R,
+Lemma sin_decr_1 x y :
     x <= 3 * (PI / 2) ->
     PI / 2 <= x ->
     y <= 3 * (PI / 2) -> PI / 2 <= y -> x <= y -> sin y <= sin x.
@@ -1439,8 +1413,7 @@ Proof.
           | elim (Rlt_irrefl x (Rle_lt_trans x y x H3 H5)) ] ].
 Qed.
 
-Lemma cos_incr_0 :
-  forall x y:R,
+Lemma cos_incr_0 x y :
     PI <= x ->
     x <= 2 * PI -> PI <= y -> y <= 2 * PI -> cos x <= cos y -> x <= y.
 Proof.
@@ -1456,8 +1429,7 @@ Proof.
           | elim (Rlt_irrefl (cos x) (Rle_lt_trans (cos x) (cos y) (cos x) H3 H5)) ] ].
 Qed.
 
-Lemma cos_incr_1 :
-  forall x y:R,
+Lemma cos_incr_1 x y :
     PI <= x ->
     x <= 2 * PI -> PI <= y -> y <= 2 * PI -> x <= y -> cos x <= cos y.
 Proof.
@@ -1473,8 +1445,7 @@ Proof.
           | elim (Rlt_irrefl x (Rle_lt_trans x y x H3 H5)) ] ].
 Qed.
 
-Lemma cos_decr_0 :
-  forall x y:R,
+Lemma cos_decr_0 x y :
     0 <= x -> x <= PI -> 0 <= y -> y <= PI -> cos x <= cos y -> y <= x.
 Proof.
   intros; case (Rtotal_order (cos x) (cos y)); intro H4;
@@ -1503,8 +1474,7 @@ Proof.
           | elim (Rlt_irrefl x (Rle_lt_trans x y x H3 H5)) ] ].
 Qed.
 
-Lemma tan_incr_0 :
-  forall x y:R,
+Lemma tan_incr_0 x y :
     - (PI / 4) <= x ->
     x <= PI / 4 -> - (PI / 4) <= y -> y <= PI / 4 -> tan x <= tan y -> x <= y.
 Proof.
@@ -1520,8 +1490,7 @@ Proof.
           | elim (Rlt_irrefl (tan x) (Rle_lt_trans (tan x) (tan y) (tan x) H3 H5)) ] ].
 Qed.
 
-Lemma tan_incr_1 :
-  forall x y:R,
+Lemma tan_incr_1 x y :
     - (PI / 4) <= x ->
     x <= PI / 4 -> - (PI / 4) <= y -> y <= PI / 4 -> x <= y -> tan x <= tan y.
 Proof.
@@ -1538,7 +1507,7 @@ Proof.
 Qed.
 
 (**********)
-Lemma sin_eq_0_1 : forall x:R, (exists k : Z, x = IZR k * PI) -> sin x = 0.
+Lemma sin_eq_0_1 x : (exists k : Z, x = IZR k * PI) -> sin x = 0.
 Proof.
   intros.
   elim H; intros.
@@ -1616,7 +1585,7 @@ Proof.
   reflexivity.
 Qed.
 
-Lemma sin_eq_0_0 (x:R) : sin x = 0 ->  exists k : Z, x = IZR k * PI.
+Lemma sin_eq_0_0 x : sin x = 0 ->  exists k : Z, x = IZR k * PI.
 Proof.
   intros Hx.
   destruct (euclidian_division x PI PI_neq0) as (q & r & EQ & Hr & Hr').
@@ -1636,7 +1605,7 @@ Proof.
     generalize (sin_gt_0 r Hr Hr'). rewrite H'. apply Rlt_irrefl.
 Qed.
 
-Lemma cos_eq_0_0 (x:R) :
+Lemma cos_eq_0_0 x :
   cos x = 0 ->  exists k : Z, x = IZR k * PI + PI / 2.
 Proof.
   rewrite cos_sin. intros Hx.
@@ -1645,7 +1614,7 @@ Proof.
   symmetry in Hk. field_simplify [Hk]. field.
 Qed.
 
-Lemma cos_eq_0_1 (x:R) :
+Lemma cos_eq_0_1 x :
   (exists k : Z, x = IZR k * PI + PI / 2) -> cos x = 0.
 Proof.
   rewrite cos_sin. intros (k,->).
@@ -1654,7 +1623,7 @@ Proof.
   apply sin_eq_0_1. now exists k.
 Qed.
 
-Lemma sin_eq_O_2PI_0 (x:R) :
+Lemma sin_eq_O_2PI_0 x :
   0 <= x -> x <= 2 * PI -> sin x = 0 ->
   x = 0 \/ x = PI \/ x = 2 * PI.
 Proof.
@@ -1690,7 +1659,7 @@ Proof.
       now rewrite Rmult_1_l.
 Qed.
 
-Lemma sin_eq_O_2PI_1 (x:R) :
+Lemma sin_eq_O_2PI_1 x :
   0 <= x -> x <= 2 * PI ->
   x = 0 \/ x = PI \/ x = 2 * PI -> sin x = 0.
 Proof.
@@ -1700,7 +1669,7 @@ Proof.
   - now rewrite sin_2PI.
 Qed.
 
-Lemma cos_eq_0_2PI_0 (x:R) :
+Lemma cos_eq_0_2PI_0 x :
   0 <= x -> x <= 2 * PI -> cos x = 0 ->
   x = PI / 2 \/ x = 3 * (PI / 2).
 Proof.
@@ -1743,7 +1712,7 @@ Proof.
     omega.
 Qed.
 
-Lemma cos_eq_0_2PI_1 (x:R) :
+Lemma cos_eq_0_2PI_1 x :
   0 <= x -> x <= 2 * PI ->
   x = PI / 2 \/ x = 3 * (PI / 2) -> cos x = 0.
 Proof.

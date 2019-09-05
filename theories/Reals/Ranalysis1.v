@@ -734,18 +734,15 @@ Proof.
   assumption.
 Qed.
 
-Lemma derivable_pt_lim_Rsqr : forall x:R, derivable_pt_lim Rsqr x (2 * x).
+Lemma derivable_pt_lim_Rsqr : forall x:R, derivable_pt_lim (fun x => x ^ 2) x (2 * x).
 Proof.
   intro; unfold derivable_pt_lim.
-  unfold Rsqr; intros eps Heps; exists (mkposreal eps Heps);
-    intros h H1 H2; replace (((x + h) * (x + h) - x * x) / h - 2 * x) with h.
+  intros eps Heps; exists (mkposreal eps Heps);
+    intros h H1 H2; replace (((x + h) ^ 2 - x ^ 2) / h - 2 * x) with h.
   assumption.
-  replace ((x + h) * (x + h) - x * x) with (2 * x * h + h * h);
+  replace ((x + h) ^ 2 - x ^ 2) with (2 * x * h + h * h);
   [ idtac | ring ].
-  unfold Rdiv; rewrite Rmult_plus_distr_r.
-  repeat rewrite Rmult_assoc.
-  repeat rewrite <- Rinv_r_sym; [ idtac | assumption ].
-  ring.
+  now field.
 Qed.
 
 Lemma derivable_pt_lim_comp :
@@ -850,7 +847,7 @@ Proof.
   apply derivable_pt_lim_id.
 Qed.
 
-Lemma derivable_pt_Rsqr : forall x:R, derivable_pt Rsqr x.
+Lemma derivable_pt_Rsqr : forall x:R, derivable_pt (fun x => x ^ 2) x.
 Proof.
   unfold derivable_pt; intro; exists (2 * x).
   apply derivable_pt_lim_Rsqr.
@@ -912,7 +909,7 @@ Proof.
   unfold derivable; intro; apply derivable_pt_id.
 Qed.
 
-Lemma derivable_Rsqr : derivable Rsqr.
+Lemma derivable_Rsqr : derivable (fun x => x ^ 2).
 Proof.
   unfold derivable; intro; apply derivable_pt_Rsqr.
 Qed.
@@ -1035,7 +1032,7 @@ Proof.
 Qed.
 
 Lemma derive_pt_Rsqr :
-  forall x:R, derive_pt Rsqr x (derivable_pt_Rsqr _) = 2 * x.
+  forall x:R, derive_pt (fun x => x ^ 2) x (derivable_pt_Rsqr _) = 2 * x.
 Proof.
   intros.
   apply derive_pt_eq_0.

@@ -240,7 +240,7 @@ Qed.
 
 
 (** Definition of cosinus *)
-Definition cos (x:R) : R := let (a,_) := exist_cos (Rsqr x) in a.
+Definition cos (x:R) : R := let (a,_) := exist_cos (x ^ 2) in a.
 
 Definition sin_n (n:nat) : R := (-1) ^ n / INR (fact (2 * n + 1)).
 
@@ -358,7 +358,7 @@ Defined.
 
 (***********************)
 (* Definition of sinus *)
-Definition sin (x:R) : R := let (a,_) := exist_sin (Rsqr x) in x * a.
+Definition sin (x:R) : R := let (a,_) := exist_sin (x ^ 2) in x * a.
 
 (*********************************************)
 (** *              Properties                *)
@@ -366,21 +366,21 @@ Definition sin (x:R) : R := let (a,_) := exist_sin (Rsqr x) in x * a.
 
 Lemma cos_sym : forall x:R, cos x = cos (- x).
 Proof.
-  intros; unfold cos; replace (Rsqr (- x)) with (Rsqr x).
+  intros; unfold cos; replace ((- x) ^ 2) with (x ^ 2).
   reflexivity.
   apply Rsqr_neg.
 Qed.
 
 Lemma sin_antisym : forall x:R, sin (- x) = - sin x.
 Proof.
-  intro; unfold sin; replace (Rsqr (- x)) with (Rsqr x);
+  intro; unfold sin; replace ((- x) ^ 2) with (x ^ 2);
     [ idtac | apply Rsqr_neg ].
-  case (exist_sin (Rsqr x)); intros; ring.
+  case (exist_sin (x ^ 2)); intros; ring.
 Qed.
 
 Lemma sin_0 : sin 0 = 0.
 Proof.
-  unfold sin; case (exist_sin (Rsqr 0)).
+  unfold sin; case (exist_sin (0 ^ 2)).
   intros; ring.
 Qed.
 
@@ -411,6 +411,6 @@ Proof.
   apply H0.
   apply H.
   exact (proj2_sig exist_cos0).
-  assert (H := proj2_sig (exist_cos (Rsqr 0))); unfold cos;
-    pattern 0 at 1; replace 0 with (Rsqr 0); [ exact H | apply Rsqr_0 ].
+  assert (H := proj2_sig (exist_cos (0 ^ 2))); unfold cos;
+    pattern 0 at 1; replace 0 with (0 ^ 2); [ exact H | apply Rsqr_0 ].
 Qed.

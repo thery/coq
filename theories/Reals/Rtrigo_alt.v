@@ -100,10 +100,9 @@ Proof.
       (4 * INR n0 * INR n0 + 18 * INR n0 + 20); [ idtac | ring ].
   apply Rle_trans with 20.
   apply Rle_trans with 16.
-  replace 16 with (Rsqr 4); [ idtac | ring_Rsqr ].
-  apply Rsqr_incr_1.
-  assumption.
-  assumption.
+  rewrite <- Rsqr_def.
+  replace 16 with (4 ^ 2) by ring.
+  apply Rsqr_incr_1; trivial.
   now apply IZR_le.
   now apply IZR_le.
   rewrite <- (Rplus_0_l 20) at 1;
@@ -135,7 +134,7 @@ Proof.
   apply le_n_Sn.
   ring.
   unfold sin.
-  destruct (exist_sin (Rsqr a)) as (x,p).
+  destruct (exist_sin (a ^ 2)) as (x,p).
   unfold sin_in, infinite_sum, R_dist in p;
       unfold Un_cv, R_dist;
       intros.
@@ -143,7 +142,7 @@ Proof.
   intro H4; destruct (p _ H4) as (N,H6).
   exists N; intros.
   replace (sum_f_R0 (tg_alt Un) n0) with
-  (a * (1 - sum_f_R0 (fun i:nat => sin_n i * Rsqr a ^ i) (S n0))).
+  (a * (1 - sum_f_R0 (fun i:nat => sin_n i * (a ^ 2) ^ i) (S n0))).
   unfold Rminus; rewrite Rmult_plus_distr_l; rewrite Rmult_1_r;
     rewrite Ropp_plus_distr; rewrite Ropp_involutive;
       repeat rewrite Rplus_assoc; rewrite (Rplus_comm a);
@@ -157,7 +156,7 @@ Proof.
         <- Rabs_Ropp, Ropp_plus_distr, Ropp_involutive, Rmult_1_l.
           unfold Rminus, Rdiv in H6. apply H6; unfold ge;
             apply le_trans with n0; [ exact H5 | apply le_n_Sn ].
-  rewrite (decomp_sum (fun i:nat => sin_n i * Rsqr a ^ i) (S n0)).
+  rewrite (decomp_sum (fun i:nat => sin_n i * (a ^ 2) ^ i) (S n0)).
   replace (sin_n 0) with 1.
   simpl; rewrite Rmult_1_r; unfold Rminus;
     rewrite Ropp_plus_distr; rewrite <- Rplus_assoc; rewrite Rplus_opp_r;
@@ -166,8 +165,8 @@ Proof.
           apply sum_eq.
   intros; unfold sin_n, Un, tg_alt;
     replace ((-1) ^ S i) with (- (-1) ^ i).
-  replace (a ^ (2 * S i + 1)) with (Rsqr a * Rsqr a ^ i * a).
-  unfold Rdiv; ring.
+  replace (a ^ (2 * S i + 1)) with (a ^ 2 * (a ^ 2) ^ i * a).
+  simpl; unfold Rdiv; ring.
   rewrite pow_add; rewrite pow_Rsqr; simpl; ring.
   simpl; ring.
   unfold sin_n; unfold Rdiv; simpl; rewrite Rinv_1;
@@ -277,7 +276,8 @@ Proof.
     with (4 * INR n1 * INR n1 + 14 * INR n1 + 12); [ idtac | ring ].
   apply Rle_trans with 12.
   apply Rle_trans with 4.
-  change 4 with (Rsqr 2).
+  rewrite <- Rsqr_def.
+  replace 4 with (2 ^ 2) by ring.
   apply Rsqr_incr_1.
   assumption.
   assumption.
@@ -306,13 +306,13 @@ Proof.
   apply le_n_2n.
   apply (fun m n p:nat => mult_le_compat_l p n m); apply le_n_Sn.
   apply (fun m n p:nat => mult_le_compat_l p n m); apply le_n_S; assumption.
-  unfold cos. destruct (exist_cos (Rsqr a0)) as (x,p).
+  unfold cos. destruct (exist_cos (a0 ^ 2)) as (x,p).
   unfold cos_in, infinite_sum, R_dist in p;
    unfold Un_cv, R_dist; intros.
   destruct (p _ H4) as (N,H6).
   exists N; intros.
   replace (sum_f_R0 (tg_alt Un) n1) with
-  (1 - sum_f_R0 (fun i:nat => cos_n i * Rsqr a0 ^ i) (S n1)).
+  (1 - sum_f_R0 (fun i:nat => cos_n i * (a0 ^ 2) ^ i) (S n1)).
   unfold Rminus; rewrite Ropp_plus_distr; rewrite Ropp_involutive;
     repeat rewrite Rplus_assoc; rewrite (Rplus_comm 1);
       rewrite (Rplus_comm (-(1))); repeat rewrite Rplus_assoc;
@@ -322,18 +322,18 @@ Proof.
   unfold ge; apply le_trans with n1.
   exact H5.
   apply le_n_Sn.
-  rewrite (decomp_sum (fun i:nat => cos_n i * Rsqr a0 ^ i) (S n1)).
+  rewrite (decomp_sum (fun i:nat => cos_n i * (a0 ^ 2) ^ i) (S n1)).
   replace (cos_n 0) with 1.
   simpl; rewrite Rmult_1_r; unfold Rminus;
     rewrite Ropp_plus_distr; rewrite <- Rplus_assoc; rewrite Rplus_opp_r;
       rewrite Rplus_0_l;
-        replace (- sum_f_R0 (fun i:nat => cos_n (S i) * (Rsqr a0 * Rsqr a0 ^ i)) n1)
+        replace (- sum_f_R0 (fun i:nat => cos_n (S i) * (a0 * (a0 * 1) * (a0 * (a0 * 1)) ^ i)) n1)
     with
-      (-1 * sum_f_R0 (fun i:nat => cos_n (S i) * (Rsqr a0 * Rsqr a0 ^ i)) n1);
-      [ idtac | ring ]; rewrite scal_sum; apply sum_eq;
+      (-1 * sum_f_R0 (fun i:nat => cos_n (S i) * (a0 ^ 2 * (a0 ^ 2) ^ i)) n1);
+      [ idtac | simpl; ring ]; rewrite scal_sum; apply sum_eq;
         intros; unfold cos_n, Un, tg_alt.
   replace ((-1) ^ S i) with (- (-1) ^ i).
-  replace (a0 ^ (2 * S i)) with (Rsqr a0 * Rsqr a0 ^ i).
+  replace (a0 ^ (2 * S i)) with (a0 ^ 2 * (a0 ^ 2) ^ i).
   unfold Rdiv; ring.
   rewrite pow_Rsqr; reflexivity.
   simpl; ring.

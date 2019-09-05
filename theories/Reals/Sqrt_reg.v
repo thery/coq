@@ -19,7 +19,7 @@ Lemma sqrt_var_maj :
   forall h:R, Rabs h <= 1 -> Rabs (sqrt (1 + h) - 1) <= Rabs h.
 Proof.
   intros; cut (0 <= 1 + h).
-  intro; apply Rle_trans with (Rabs (sqrt (Rsqr (1 + h)) - 1)).
+  intro; apply Rle_trans with (Rabs (sqrt ((1 + h) ^ 2) - 1)).
   destruct (total_order_T h 0) as [[Hlt|Heq]|Hgt].
   repeat rewrite Rabs_left.
   unfold Rminus; do 2 rewrite <- (Rplus_comm (-1)).
@@ -29,7 +29,7 @@ Proof.
   apply Ropp_le_contravar; apply sqrt_le_1.
   apply Rle_0_sqr.
   apply H0.
-  pattern (1 + h) at 2; rewrite <- Rmult_1_r; unfold Rsqr;
+  pattern (1 + h) at 2; rewrite <- Rmult_1_r, !Rsqr_def;
     apply Rmult_le_compat_l.
   apply H0.
   pattern 1 at 2; rewrite <- Rplus_0_r; apply Rplus_le_compat_l; left;
@@ -61,7 +61,7 @@ Proof.
   apply sqrt_le_1.
   apply H0.
   apply Rle_0_sqr.
-  pattern (1 + h) at 1; rewrite <- Rmult_1_r; unfold Rsqr;
+  pattern (1 + h) at 1; rewrite <- Rmult_1_r, !Rsqr_def;
     apply Rmult_le_compat_l.
   apply H0.
   pattern 1 at 1; rewrite <- Rplus_0_r; apply Rplus_le_compat_l; left;
@@ -334,9 +334,9 @@ Proof.
   unfold continuity_pt; unfold continue_in;
     unfold limit1_in; unfold limit_in;
       simpl; unfold R_dist; intros.
-  exists (Rsqr eps); intros.
+  exists (eps ^ 2); intros.
   split.
-  change (0 < Rsqr eps); apply Rsqr_pos_lt.
+  change (0 < eps ^ 2); apply Rsqr_pos_lt.
   red; intro; rewrite H3 in H2; elim (Rlt_irrefl _ H2).
   intros; elim H3; intros.
   rewrite <- H1; rewrite sqrt_0; unfold Rminus; rewrite Ropp_0;

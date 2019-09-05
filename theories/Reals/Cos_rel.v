@@ -257,13 +257,15 @@ Lemma pow_sqr : forall (x:R) (i:nat), x ^ (2 * i) = (x * x) ^ i.
 Proof.
 intros.
 assert (H := pow_Rsqr x i).
-unfold Rsqr in H; exact H.
+rewrite H.
+apply f_equal2 with (f := pow); trivial.
+ring.
 Qed.
 
 Lemma A1_cvg : forall x:R, Un_cv (A1 x) (cos x).
 Proof.
 intro.
-unfold cos; destruct (exist_cos (Rsqr x)) as (x0,p).
+unfold cos; destruct (exist_cos (x ^ 2)) as (x0,p).
 unfold cos_in, cos_n, infinite_sum, R_dist in p.
 unfold Un_cv, R_dist; intros.
 destruct (p eps H) as (x1,H0).
@@ -271,20 +273,20 @@ exists x1; intros.
 unfold A1.
 replace
  (sum_f_R0 (fun k:nat => (-1) ^ k / INR (fact (2 * k)) * x ^ (2 * k)) n) with
- (sum_f_R0 (fun i:nat => (-1) ^ i / INR (fact (2 * i)) * (x * x) ^ i) n).
+ (sum_f_R0 (fun i:nat => (-1) ^ i / INR (fact (2 * i)) * (x ^ 2) ^ i) n).
 apply H0; assumption.
 apply sum_eq.
 intros.
-replace ((x * x) ^ i) with (x ^ (2 * i)).
+replace ((x ^ 2) ^ i) with (x ^ (2 * i)).
 reflexivity.
-apply pow_sqr.
+apply pow_Rsqr.
 Qed.
 
 Lemma C1_cvg : forall x y:R, Un_cv (C1 x y) (cos (x + y)).
 Proof.
 intros.
 unfold cos.
-destruct (exist_cos (Rsqr (x + y))) as (x0,p).
+destruct (exist_cos ((x + y) ^ 2)) as (x0,p).
 unfold cos_in, cos_n, infinite_sum, R_dist in p.
 unfold Un_cv, R_dist; intros.
 destruct (p eps H) as (x1,H0).
@@ -294,13 +296,13 @@ replace
  (sum_f_R0 (fun k:nat => (-1) ^ k / INR (fact (2 * k)) * (x + y) ^ (2 * k)) n)
  with
  (sum_f_R0
-    (fun i:nat => (-1) ^ i / INR (fact (2 * i)) * ((x + y) * (x + y)) ^ i) n).
+    (fun i:nat => (-1) ^ i / INR (fact (2 * i)) * ((x + y) ^ 2) ^ i) n).
 apply H0; assumption.
 apply sum_eq.
 intros.
-replace (((x + y) * (x + y)) ^ i) with ((x + y) ^ (2 * i)).
+replace (((x + y) ^ 2) ^ i) with ((x + y) ^ (2 * i)).
 reflexivity.
-apply pow_sqr.
+apply pow_Rsqr.
 Qed.
 
 Lemma B1_cvg : forall x:R, Un_cv (B1 x) (sin x).
@@ -320,7 +322,7 @@ simpl; ring.
 rewrite tech5; rewrite <- Hrecn.
 simpl; ring.
 unfold ge; apply le_O_n.
-unfold sin. destruct (exist_sin (Rsqr x)) as (x0,p).
+unfold sin. destruct (exist_sin (x ^ 2)) as (x0,p).
 unfold sin_in, sin_n, infinite_sum, R_dist in p.
 unfold Un_cv, R_dist; intros.
 cut (0 < eps / Rabs x);
@@ -334,13 +336,13 @@ replace
  (sum_f_R0 (fun k:nat => (-1) ^ k / INR (fact (2 * k + 1)) * x ^ (2 * k + 1))
     n) with
  (x *
-  sum_f_R0 (fun i:nat => (-1) ^ i / INR (fact (2 * i + 1)) * (x * x) ^ i) n).
+  sum_f_R0 (fun i:nat => (-1) ^ i / INR (fact (2 * i + 1)) * (x ^ 2) ^ i) n).
 replace
  (x *
-  sum_f_R0 (fun i:nat => (-1) ^ i / INR (fact (2 * i + 1)) * (x * x) ^ i) n -
+  sum_f_R0 (fun i:nat => (-1) ^ i / INR (fact (2 * i + 1)) * (x ^ 2) ^ i) n -
   x * x0) with
  (x *
-  (sum_f_R0 (fun i:nat => (-1) ^ i / INR (fact (2 * i + 1)) * (x * x) ^ i) n -
+  (sum_f_R0 (fun i:nat => (-1) ^ i / INR (fact (2 * i + 1)) * (x ^ 2) ^ i) n -
    x0)); [ idtac | ring ].
 rewrite Rabs_mult.
 apply Rmult_lt_reg_l with (/ Rabs x).
@@ -354,5 +356,5 @@ intros.
 rewrite pow_add.
 rewrite pow_sqr.
 simpl.
-ring.
+rewrite Rmult_1_r; ring.
 Qed.

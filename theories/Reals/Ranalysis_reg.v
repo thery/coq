@@ -103,7 +103,7 @@ Ltac intro_hyp_glob trm :=
     | cosh => idtac
     | sinh => idtac
     | exp => idtac
-    | Rsqr => idtac
+    | (fun x => x ^ 2) => idtac
     | sqrt => idtac
     | id => idtac
     | (fct_cte _) => idtac
@@ -232,7 +232,7 @@ Ltac intro_hyp_pt trm pt :=
     | cosh => idtac
     | sinh => idtac
     | exp => idtac
-    | Rsqr => idtac
+    | (fun x => x ^ 2) => idtac
     | id => idtac
     | (fct_cte _) => idtac
     | (pow_fct _) => idtac
@@ -281,7 +281,7 @@ Ltac intro_hyp_pt trm pt :=
 (**********)
 Ltac is_diff_pt :=
   match goal with
-    |  |- (derivable_pt Rsqr _) =>
+    |  |- (derivable_pt (fun x => x ^ 2) _) =>
 
   (* fonctions de base *)
       apply derivable_pt_Rsqr
@@ -359,7 +359,7 @@ Ltac is_diff_pt :=
 (**********)
 Ltac is_diff_glob :=
   match goal with
-    |  |- (derivable Rsqr) =>
+    |  |- (derivable (fun x => x ^ 2)) =>
   (* fonctions de base *)
       apply derivable_Rsqr
     |  |- (derivable id) => apply derivable_id
@@ -428,7 +428,7 @@ Ltac is_diff_glob :=
 (**********)
 Ltac is_cont_pt :=
   match goal with
-    |  |- (continuity_pt Rsqr _) =>
+    |  |- (continuity_pt (fun x => x ^ 2) _) =>
 
        (* fonctions de base *)
       apply derivable_continuous_pt; apply derivable_pt_Rsqr
@@ -518,7 +518,7 @@ Ltac is_cont_pt :=
 (**********)
 Ltac is_cont_glob :=
   match goal with
-    |  |- (continuity Rsqr) =>
+    |  |- (continuity (fun x => x ^ 2)) =>
 
        (* fonctions de base *)
       apply derivable_continuous; apply derivable_Rsqr
@@ -717,7 +717,7 @@ Ltac deriv_proof trm pt :=
     | cosh => constr:(derivable_pt_cosh pt)
     | exp => constr:(derivable_pt_exp pt)
     | id => constr:(derivable_pt_id pt)
-    | Rsqr => constr:(derivable_pt_Rsqr pt)
+    | (fun x => x ^ 2) => constr:(derivable_pt_Rsqr pt)
     | sqrt =>
       match goal with
         | id:(0 < pt) |- _ => constr:(derivable_pt_sqrt pt id)
@@ -761,7 +761,7 @@ Ltac simplify_derive trm pt :=
     | sinh => try rewrite derive_pt_sinh
     | cosh => try rewrite derive_pt_cosh
     | exp => try rewrite derive_pt_exp
-    | Rsqr => try rewrite derive_pt_Rsqr
+    | (fun x => x ^ 2) => try rewrite derive_pt_Rsqr
     | sqrt => try rewrite derive_pt_sqrt
     | ?X1 =>
       let aux := constr:(X1) in

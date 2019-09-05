@@ -411,7 +411,7 @@ Lemma limit_inv :
 Proof.
   unfold limit1_in; unfold limit_in; simpl;
     unfold R_dist; intros; elim (H (Rabs l / 2)).
-  intros delta1 H2; elim (H (eps * (Rsqr l / 2))).
+  intros delta1 H2; elim (H (eps * ((l ^ 2) / 2))).
   intros delta2 H3; elim H2; elim H3; intros; exists (Rmin delta1 delta2);
     split.
   unfold Rmin; case (Rle_dec delta1 delta2); intro; assumption.
@@ -432,36 +432,22 @@ Proof.
     rewrite Rplus_0_r; intro; cut (f x <> 0).
   intro; replace (/ f x + - / l) with ((l - f x) * / (l * f x)).
   rewrite Rabs_mult; rewrite Rabs_Rinv.
-  cut (/ Rabs (l * f x) < 2 / Rsqr l).
+  cut (/ Rabs (l * f x) < 2 / (l ^ 2)).
   intro; rewrite Rabs_minus_sym in H5; cut (0 <= / Rabs (l * f x)).
   intro;
     generalize
-      (Rmult_le_0_lt_compat (Rabs (l - f x)) (eps * (Rsqr l / 2))
-        (/ Rabs (l * f x)) (2 / Rsqr l) (Rabs_pos (l - f x)) H18 H5 H17);
-      replace (eps * (Rsqr l / 2) * (2 / Rsqr l)) with eps.
+      (Rmult_le_0_lt_compat (Rabs (l - f x)) (eps * ((l ^ 2) / 2))
+        (/ Rabs (l * f x)) (2 / (l ^ 2)) (Rabs_pos (l - f x)) H18 H5 H17);
+      replace (eps * ((l ^2) / 2) * (2 / (l ^ 2))) with eps.
   intro; assumption.
-  unfold Rdiv; unfold Rsqr; rewrite Rinv_mult_distr.
-  repeat rewrite Rmult_assoc.
-  rewrite (Rmult_comm l).
-  repeat rewrite Rmult_assoc.
-  rewrite <- Rinv_l_sym.
-  rewrite Rmult_1_r.
-  rewrite (Rmult_comm l).
-  repeat rewrite Rmult_assoc.
-  rewrite <- Rinv_l_sym.
-  rewrite Rmult_1_r.
-  rewrite <- Rinv_l_sym.
-  rewrite Rmult_1_r; reflexivity.
-  discrR.
-  exact H0.
-  exact H0.
-  exact H0.
-  exact H0.
-  left; apply Rinv_0_lt_compat; apply Rabs_pos_lt; apply prod_neq_R0;
-    assumption.
+  now field.
+  apply Rlt_le.
+  apply Rinv_0_lt_compat.
+  now apply Rabs_pos_lt; apply prod_neq_R0.
   rewrite Rmult_comm; rewrite Rabs_mult; rewrite Rinv_mult_distr.
-  rewrite (Rsqr_abs l); unfold Rsqr; unfold Rdiv;
-    rewrite Rinv_mult_distr.
+  rewrite (Rsqr_abs l).
+  replace (Rabs l ^ 2) with (Rabs l * Rabs l) by ring.
+  unfold Rdiv; rewrite Rinv_mult_distr.
   repeat rewrite <- Rmult_assoc; apply Rmult_lt_compat_r.
   apply Rinv_0_lt_compat; apply Rabs_pos_lt; assumption.
   apply Rmult_lt_reg_l with (Rabs (f x) * Rabs l * / 2).
@@ -530,7 +516,7 @@ Proof.
     [ assumption
       | apply Rlt_le_trans with (Rmin delta1 delta2);
         [ assumption | apply Rmin_l ] ].
-  change (0 < eps * (Rsqr l / 2)); unfold Rdiv;
+  change (0 < eps * ((l ^ 2) / 2)); unfold Rdiv;
     repeat rewrite Rmult_assoc; apply Rmult_lt_0_compat.
   assumption.
   apply Rmult_lt_0_compat. apply Rsqr_pos_lt; assumption.

@@ -217,7 +217,7 @@ Proof.
   apply Rle_trans with
     (sum_f_R0
       (fun k:nat =>
-	sum_f_R0 (fun l:nat => C ^ (4 * N) * Rsqr (/ INR (fact (S (N + k)))))
+        sum_f_R0 (fun l:nat => C ^ (4 * N) * (/ INR (fact (S (N + k)))) ^2)
         (pred (N - k))) (pred N)).
   apply sum_Rle; intros.
   apply sum_Rle; intros.
@@ -245,7 +245,7 @@ Proof.
   rewrite Rmult_1_l.
   replace (2 * S (N + n) - S (N + n))%nat with (S (N + n)).
   rewrite Rinv_mult_distr.
-  unfold Rsqr; reflexivity.
+  ring.
   apply INR_fact_neq_0.
   apply INR_fact_neq_0.
   omega.
@@ -265,7 +265,7 @@ Proof.
   apply sum_Rle; intros.
   rewrite <-
     (scal_sum (fun _:nat => C ^ (4 * N)) (pred (N - n))
-      (Rsqr (/ INR (fact (S (N + n)))))).
+      ((/ INR (fact (S (N + n)))) ^ 2)).
   rewrite sum_cte.
   rewrite <- Rmult_assoc.
   do 2 rewrite <- (Rmult_comm (C ^ (4 * N))).
@@ -275,7 +275,7 @@ Proof.
   left; apply Rlt_le_trans with 1.
   apply Rlt_0_1.
   unfold C; apply RmaxLess1.
-  apply Rle_trans with (Rsqr (/ INR (fact (S (N + n)))) * INR N).
+  apply Rle_trans with ((/ INR (fact (S (N + n)))) ^ 2 * INR N).
   apply Rmult_le_compat_l.
   apply Rle_0_sqr.
   apply le_INR.
@@ -284,7 +284,7 @@ Proof.
   apply pos_INR.
   apply Rle_trans with (/ INR (fact (S (N + n)))).
   pattern (/ INR (fact (S (N + n)))) at 2; rewrite <- Rmult_1_r.
-  unfold Rsqr.
+  rewrite Rsqr_def.
   apply Rmult_le_compat_l.
   left; apply Rinv_0_lt_compat; apply INR_fact_lt_0.
   apply Rmult_le_reg_l with (INR (fact (S (N + n)))).
@@ -492,7 +492,7 @@ Proof.
     (sum_f_R0
       (fun k:nat =>
 	sum_f_R0
-        (fun l:nat => C ^ (4 * S N) * Rsqr (/ INR (fact (S (S (N + k))))))
+        (fun l:nat => C ^ (4 * S N) * (/ INR (fact (S (S (N + k))))) ^ 2)
         (pred (N - k))) (pred N)).
   apply sum_Rle; intros.
   apply sum_Rle; intros.
@@ -526,7 +526,7 @@ Proof.
   rewrite Rmult_1_l.
   replace (2 * S (S (N + n)) - S (S (N + n)))%nat with (S (S (N + n))).
   rewrite Rinv_mult_distr.
-  unfold Rsqr; reflexivity.
+  ring.
   apply INR_fact_neq_0.
   apply INR_fact_neq_0.
   omega.
@@ -548,7 +548,7 @@ Proof.
   apply sum_Rle; intros.
   rewrite <-
     (scal_sum (fun _:nat => C ^ (4 * S N)) (pred (N - n))
-      (Rsqr (/ INR (fact (S (S (N + n))))))).
+      ((/ INR (fact (S (S (N + n))))) ^ 2)).
   rewrite sum_cte.
   rewrite <- Rmult_assoc.
   do 2 rewrite <- (Rmult_comm (C ^ (4 * S N))).
@@ -558,7 +558,7 @@ Proof.
   left; apply Rlt_le_trans with 1.
   apply Rlt_0_1.
   unfold C; apply RmaxLess1.
-  apply Rle_trans with (Rsqr (/ INR (fact (S (S (N + n))))) * INR N).
+  apply Rle_trans with ((/ INR (fact (S (S (N + n))))) ^ 2 * INR N).
   apply Rmult_le_compat_l.
   apply Rle_0_sqr.
   replace (S (pred (N - n))) with (N - n)%nat.
@@ -569,7 +569,7 @@ Proof.
   apply pos_INR.
   apply Rle_trans with (/ INR (fact (S (S (N + n))))).
   pattern (/ INR (fact (S (S (N + n))))) at 2; rewrite <- Rmult_1_r.
-  unfold Rsqr.
+  rewrite Rsqr_def.
   apply Rmult_le_compat_l.
   left; apply Rinv_0_lt_compat; apply INR_fact_lt_0.
   apply Rmult_le_reg_l with (INR (fact (S (S (N + n))))).

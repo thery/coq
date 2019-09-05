@@ -18,7 +18,7 @@ Local Open Scope R_scope.
 (** * Distance *)
 
 Definition dist_euc (x0 y0 x1 y1:R) : R :=
-  sqrt (Rsqr (x0 - x1) + Rsqr (y0 - y1)).
+  sqrt ((x0 - x1) ^ 2 + (y0 - y1) ^ 2).
 
 Lemma distance_refl : forall x0 y0:R, dist_euc x0 y0 x0 y0 = 0.
 Proof.
@@ -27,7 +27,7 @@ Proof.
       [ apply Rle_0_sqr | apply Rle_0_sqr ]
       | right; reflexivity
       | rewrite Rsqr_0; rewrite Rsqr_sqrt;
-        [ unfold Rsqr; ring
+        [ ring
           | apply Rplus_le_le_0_compat; [ apply Rle_0_sqr | apply Rle_0_sqr ] ] ].
 Qed.
 
@@ -38,7 +38,7 @@ Proof.
     [ apply sqrt_positivity; apply Rplus_le_le_0_compat
       | apply sqrt_positivity; apply Rplus_le_le_0_compat
       | repeat rewrite Rsqr_sqrt;
-        [ unfold Rsqr; ring
+        [ ring
           | apply Rplus_le_le_0_compat
           | apply Rplus_le_le_0_compat ] ]; apply Rle_0_sqr.
 Qed.
@@ -49,10 +49,10 @@ Lemma law_cosines :
       let b := dist_euc x2 y2 x0 y0 in
         let c := dist_euc x2 y2 x1 y1 in
           a * c * cos ac = (x0 - x1) * (x2 - x1) + (y0 - y1) * (y2 - y1) ->
-          Rsqr b = Rsqr c + Rsqr a - 2 * (a * c * cos ac).
+          b ^ 2 = c ^ 2 + a ^ 2 - 2 * (a * c * cos ac).
 Proof.
   unfold dist_euc; intros; repeat rewrite Rsqr_sqrt;
-    [ rewrite H; unfold Rsqr; ring
+    [ rewrite H; ring
       | apply Rplus_le_le_0_compat
       | apply Rplus_le_le_0_compat
       | apply Rplus_le_le_0_compat ]; apply Rle_0_sqr.
@@ -64,29 +64,29 @@ Lemma triangle :
 Proof.
   intros; unfold dist_euc; apply Rsqr_incr_0;
     [ rewrite Rsqr_plus; repeat rewrite Rsqr_sqrt;
-      [ replace (Rsqr (x0 - x1)) with
-        (Rsqr (x0 - x2) + Rsqr (x2 - x1) + 2 * (x0 - x2) * (x2 - x1));
-        [ replace (Rsqr (y0 - y1)) with
-          (Rsqr (y0 - y2) + Rsqr (y2 - y1) + 2 * (y0 - y2) * (y2 - y1));
+      [ replace ((x0 - x1) ^ 2) with
+        ((x0 - x2) ^ 2 + (x2 - x1) ^ 2 + 2 * (x0 - x2) * (x2 - x1));
+        [ replace ((y0 - y1) ^ 2) with
+          ((y0 - y2) ^ 2 + (y2 - y1) ^ 2 + 2 * (y0 - y2) * (y2 - y1));
           [ apply Rplus_le_reg_l with
-            (- Rsqr (x0 - x2) - Rsqr (x2 - x1) - Rsqr (y0 - y2) -
-              Rsqr (y2 - y1));
+            (- (x0 - x2) ^ 2 - (x2 - x1) ^ 2 - (y0 - y2) ^ 2 -
+              (y2 - y1) ^ 2);
             replace
-            (- Rsqr (x0 - x2) - Rsqr (x2 - x1) - Rsqr (y0 - y2) -
-              Rsqr (y2 - y1) +
-              (Rsqr (x0 - x2) + Rsqr (x2 - x1) + 2 * (x0 - x2) * (x2 - x1) +
-                (Rsqr (y0 - y2) + Rsqr (y2 - y1) + 2 * (y0 - y2) * (y2 - y1))))
+            (- (x0 - x2) ^ 2 - (x2 - x1) ^ 2 - (y0 - y2) ^ 2 -
+              (y2 - y1) ^ 2 +
+              ((x0 - x2) ^ 2 + (x2 - x1) ^ 2 + 2 * (x0 - x2) * (x2 - x1) +
+                ((y0 - y2) ^ 2 + (y2 - y1) ^ 2 + 2 * (y0 - y2) * (y2 - y1))))
             with (2 * ((x0 - x2) * (x2 - x1) + (y0 - y2) * (y2 - y1)));
               [ replace
-                (- Rsqr (x0 - x2) - Rsqr (x2 - x1) - Rsqr (y0 - y2) -
-                  Rsqr (y2 - y1) +
-                  (Rsqr (x0 - x2) + Rsqr (y0 - y2) +
-                    (Rsqr (x2 - x1) + Rsqr (y2 - y1)) +
-                    2 * sqrt (Rsqr (x0 - x2) + Rsqr (y0 - y2)) *
-                    sqrt (Rsqr (x2 - x1) + Rsqr (y2 - y1)))) with
+                (- (x0 - x2) ^ 2 - (x2 - x1) ^ 2 - (y0 - y2) ^ 2 -
+                  (y2 - y1) ^ 2 +
+                  ((x0 - x2) ^ 2 + (y0 - y2) ^ 2 +
+                    ((x2 - x1) ^ 2 + (y2 - y1) ^ 2) +
+                    2 * sqrt ((x0 - x2) ^ 2 + (y0 - y2) ^ 2) *
+                    sqrt ((x2 - x1) ^ 2 + (y2 - y1) ^ 2))) with
                 (2 *
-                  (sqrt (Rsqr (x0 - x2) + Rsqr (y0 - y2)) *
-                    sqrt (Rsqr (x2 - x1) + Rsqr (y2 - y1))));
+                  (sqrt ((x0 - x2) ^ 2 + (y0 - y2) ^ 2) *
+                    sqrt ((x2 - x1) ^ 2 + (y2 - y1) ^ 2)));
                 [ apply Rmult_le_compat_l;
                   [ left; cut (0%nat <> 2%nat);
                     [ intros; generalize (lt_INR_0 2 (neq_O_lt 2 H));
@@ -95,8 +95,8 @@ Proof.
                     | apply sqrt_cauchy ]
                   | ring ]
                 | ring ]
-            | ring_Rsqr ]
-          | ring_Rsqr ]
+            | ring ]
+          | ring ]
         | apply Rplus_le_le_0_compat; apply Rle_0_sqr
         | apply Rplus_le_le_0_compat; apply Rle_0_sqr
         | apply Rplus_le_le_0_compat; apply Rle_0_sqr ]
@@ -119,10 +119,10 @@ Qed.
 
 Lemma isometric_translation :
   forall x1 x2 y1 y2 tx ty:R,
-    Rsqr (x1 - x2) + Rsqr (y1 - y2) =
-    Rsqr (xt x1 tx - xt x2 tx) + Rsqr (yt y1 ty - yt y2 ty).
+    (x1 - x2) ^ 2 + (y1 - y2) ^ 2 =
+    (xt x1 tx - xt x2 tx) ^ 2 + (yt y1 ty - yt y2 ty) ^ 2.
 Proof.
-  intros; unfold Rsqr, xt, yt; ring.
+  intros; unfold xt, yt; ring.
 Qed.
 
 (******************************************************************)
@@ -146,22 +146,19 @@ Qed.
 
 Lemma isometric_rotation_0 :
   forall x1 y1 x2 y2 theta:R,
-    Rsqr (x1 - x2) + Rsqr (y1 - y2) =
-    Rsqr (xr x1 y1 theta - xr x2 y2 theta) +
-    Rsqr (yr x1 y1 theta - yr x2 y2 theta).
+    (x1 - x2) ^ 2 + (y1 - y2) ^ 2 =
+    (xr x1 y1 theta - xr x2 y2 theta) ^ 2 +
+    (yr x1 y1 theta - yr x2 y2 theta) ^ 2.
 Proof.
-  intros; unfold xr, yr;
-    replace
+  intros; unfold xr, yr.
+  replace
     (x1 * cos theta + y1 * sin theta - (x2 * cos theta + y2 * sin theta)) with
-    (cos theta * (x1 - x2) + sin theta * (y1 - y2));
-    [ replace
+    (cos theta * (x1 - x2) + sin theta * (y1 - y2)) by ring.
+  replace
       (- x1 * sin theta + y1 * cos theta - (- x2 * sin theta + y2 * cos theta))
-      with (cos theta * (y1 - y2) + sin theta * (x2 - x1));
-        [ repeat rewrite Rsqr_plus; repeat rewrite Rsqr_mult; repeat rewrite cos2;
-          ring_simplify; replace (x2 - x1) with (- (x1 - x2));
-          [ rewrite <- Rsqr_neg; ring | ring ]
-          | ring ]
-      | ring ].
+      with (cos theta * (y1 - y2) + sin theta * (x2 - x1)) by ring.
+  repeat rewrite Rsqr_plus; repeat rewrite Rsqr_mult; repeat rewrite cos2.
+  ring.
 Qed.
 
 Lemma isometric_rotation :
@@ -185,18 +182,18 @@ Qed.
 
 Lemma isometric_rot_trans :
   forall x1 y1 x2 y2 tx ty theta:R,
-    Rsqr (x1 - x2) + Rsqr (y1 - y2) =
-    Rsqr (xr (xt x1 tx) (yt y1 ty) theta - xr (xt x2 tx) (yt y2 ty) theta) +
-    Rsqr (yr (xt x1 tx) (yt y1 ty) theta - yr (xt x2 tx) (yt y2 ty) theta).
+    (x1 - x2) ^ 2 + (y1 - y2) ^ 2 =
+    (xr (xt x1 tx) (yt y1 ty) theta - xr (xt x2 tx) (yt y2 ty) theta) ^ 2 +
+    (yr (xt x1 tx) (yt y1 ty) theta - yr (xt x2 tx) (yt y2 ty) theta) ^ 2.
 Proof.
   intros; rewrite <- isometric_rotation_0; apply isometric_translation.
 Qed.
 
 Lemma isometric_trans_rot :
   forall x1 y1 x2 y2 tx ty theta:R,
-    Rsqr (x1 - x2) + Rsqr (y1 - y2) =
-    Rsqr (xt (xr x1 y1 theta) tx - xt (xr x2 y2 theta) tx) +
-    Rsqr (yt (yr x1 y1 theta) ty - yt (yr x2 y2 theta) ty).
+    (x1 - x2) ^ 2 + (y1 - y2) ^ 2 =
+    (xt (xr x1 y1 theta) tx - xt (xr x2 y2 theta) tx) ^ 2 +
+    (yt (yr x1 y1 theta) ty - yt (yr x2 y2 theta) ty) ^ 2.
 Proof.
   intros; rewrite <- isometric_translation; apply isometric_rotation_0.
 Qed.

@@ -613,18 +613,9 @@ Qed.
 (*********************************************************)
 
 (***********)
-Definition Rsqr r : R := r * r.
-
-Notation "r ²" := (Rsqr r) (at level 1, format "r ²") : R_scope.
-
-(***********)
-Lemma Rsqr_0 : Rsqr 0 = 0.
-  unfold Rsqr; auto with real.
-Qed.
-
-(***********)
-Lemma Rsqr_0_uniq : forall r, Rsqr r = 0 -> r = 0.
-  unfold Rsqr; intros; elim (Rmult_integral r r H); trivial.
+Lemma Rsqr_0_uniq : forall r : R, r ^ 2 = 0 -> r = 0.
+   intro r; replace (r ^ 2) with (r * r) by ring; intro H.
+   case (Rmult_integral _ _ H); trivial.
 Qed.
 
 (*********************************************************)
@@ -1424,18 +1415,20 @@ Hint Immediate tech_Rplus: real.
 (** ** Order and square function                         *)
 (*********************************************************)
 
-Lemma Rle_0_sqr : forall r, 0 <= Rsqr r.
+Lemma Rle_0_sqr : forall r, 0 <= r ^ 2.
 Proof.
-  intro; case (Rlt_le_dec r 0); unfold Rsqr; intro.
+  intro r; replace (r ^ 2) with (r * r) by ring.
+  case (Rlt_le_dec r 0); unfold Rsqr; intro.
   replace (r * r) with (- r * - r); auto with real.
   replace 0 with (- r * 0); auto with real.
   replace 0 with (0 * r); auto with real.
 Qed.
 
 (***********)
-Lemma Rlt_0_sqr : forall r, r <> 0 -> 0 < Rsqr r.
+Lemma Rlt_0_sqr : forall r, r <> 0 -> 0 < r ^ 2.
 Proof.
-  intros; case (Rdichotomy r 0); trivial; unfold Rsqr; intro.
+  intro r; replace (r ^ 2) with (r * r) by ring; intro.
+  case (Rdichotomy r 0); trivial; intro.
   replace (r * r) with (- r * - r); auto with real.
   replace 0 with (- r * 0); auto with real.
   replace 0 with (0 * r); auto with real.
@@ -1443,14 +1436,14 @@ Qed.
 Hint Resolve Rle_0_sqr Rlt_0_sqr: real.
 
 (***********)
-Lemma Rplus_sqr_eq_0_l : forall r1 r2, Rsqr r1 + Rsqr r2 = 0 -> r1 = 0.
+Lemma Rplus_sqr_eq_0_l : forall r1 r2, r1 ^ 2 + r2 ^ 2 = 0 -> r1 = 0.
 Proof.
-  intros a b; intros; apply Rsqr_0_uniq; apply Rplus_eq_0_l with (Rsqr b);
+  intros a b; intros; apply Rsqr_0_uniq; apply Rplus_eq_0_l with (b ^ 2);
     auto with real.
 Qed.
 
 Lemma Rplus_sqr_eq_0 :
-  forall r1 r2, Rsqr r1 + Rsqr r2 = 0 -> r1 = 0 /\ r2 = 0.
+  forall r1 r2, r1 ^ 2 + r2 ^ 2 = 0 -> r1 = 0 /\ r2 = 0.
 Proof.
   intros a b; split.
   apply Rplus_sqr_eq_0_l with b; auto with real.
@@ -1464,8 +1457,8 @@ Qed.
 
 Lemma Rlt_0_1 : 0 < 1.
 Proof.
-  replace 1 with (Rsqr 1); auto with real.
-  unfold Rsqr; auto with real.
+  replace 1 with (1 ^ 2) by ring.
+  auto with real.
 Qed.
 Hint Resolve Rlt_0_1: real.
 

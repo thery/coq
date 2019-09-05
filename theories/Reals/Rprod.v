@@ -109,15 +109,17 @@ Qed.
 Lemma RfactN_fact2N_factk :
   forall N k:nat,
     (k <= 2 * N)%nat ->
-    Rsqr (INR (fact N)) <= INR (fact (2 * N - k)) * INR (fact k).
+    (INR (fact N)) ^ 2 <= INR (fact (2 * N - k)) * INR (fact k).
 Proof.
+  intros N k Hk.
+  rewrite Rsqr_def.
   assert (forall (n:nat), 0 <= (if eq_nat_dec n 0 then 1 else INR n)).
-  intros; case (eq_nat_dec n 0); auto with real.
+    intros; case (eq_nat_dec n 0); auto with real.
   assert (forall (n:nat), (0 < n)%nat ->
      (if eq_nat_dec n 0 then 1 else INR n) = INR n).
-  intros n; case (eq_nat_dec n 0); auto with real.
-  intros; absurd (0 < n)%nat; omega.
-  intros; unfold Rsqr; repeat rewrite fact_prodSO.
+    intros n; case (eq_nat_dec n 0); auto with real.
+    intros; absurd (0 < n)%nat; omega.
+  repeat rewrite fact_prodSO.
   cut ((k=N)%nat \/ (k < N)%nat \/ (N < k)%nat).
   intro H2; elim H2; intro H3.
   rewrite H3; replace (2*N-N)%nat with N;[right; ring|omega].
@@ -163,16 +165,15 @@ Proof.
   omega.
 Qed.
 
-
 (**********)
-Lemma INR_fact_lt_0 : forall n:nat, 0 < INR (fact n).
+Lemma INR_fact_lt_0 n : 0 < INR (fact n).
 Proof.
-  intro; apply lt_INR_0; apply neq_O_lt; red; intro;
+  apply lt_INR_0; apply neq_O_lt; red; intro;
     elim (fact_neq_0 n); symmetry ; assumption.
 Qed.
 
 (** We have the following inequality : (C 2N k) <= (C 2N N) forall k in [|O;2N|] *)
-Lemma C_maj : forall N k:nat, (k <= 2 * N)%nat -> C (2 * N) k <= C (2 * N) N.
+Lemma C_maj N k : (k <= 2 * N)%nat -> C (2 * N) k <= C (2 * N) N.
 Proof.
   intros; unfold C; unfold Rdiv; apply Rmult_le_compat_l.
   apply pos_INR.
@@ -186,10 +187,10 @@ Proof.
   rewrite Rmult_1_r; rewrite <- mult_INR; rewrite <- Rmult_assoc;
     rewrite <- Rinv_r_sym.
   rewrite Rmult_1_l; rewrite mult_INR; rewrite (Rmult_comm (INR (fact k)));
-    replace (INR (fact N) * INR (fact N)) with (Rsqr (INR (fact N))).
+    replace (INR (fact N) * INR (fact N)) with ((INR (fact N)) ^ 2).
   apply RfactN_fact2N_factk.
   assumption.
-  reflexivity.
+  ring.
   rewrite mult_INR; apply prod_neq_R0; apply INR_fact_neq_0.
   apply prod_neq_R0; apply INR_fact_neq_0.
   omega.

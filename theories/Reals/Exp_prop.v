@@ -65,7 +65,7 @@ Qed.
 Definition maj_Reste_E (x y:R) (N:nat) : R :=
   4 *
   (Rmax 1 (Rmax (Rabs x) (Rabs y)) ^ (2 * N) /
-    Rsqr (INR (fact (div2 (pred N))))).
+    (INR (fact (div2 (pred N)))) ^ 2).
 
 (**********)
 Lemma div2_double : forall N:nat, div2 (2 * N) = N.
@@ -110,7 +110,7 @@ Proof.
     (M ^ (2 * N) *
       sum_f_R0
       (fun k:nat =>
-        sum_f_R0 (fun l:nat => / Rsqr (INR (fact (div2 (S N)))))
+        sum_f_R0 (fun l:nat => / ((INR (fact (div2 (S N))))) ^ 2)
         (pred (N - k))) (pred N)).
   unfold Reste_E.
   apply Rle_trans with
@@ -242,7 +242,7 @@ Proof.
   rewrite <- Rmult_comm.
   rewrite scal_sum.
   apply sum_Rle; intros.
-  rewrite (Rmult_comm (/ Rsqr (INR (fact (div2 (S N)))))).
+  rewrite (Rmult_comm (/ ((INR (fact (div2 (S N))))) ^ 2)).
   rewrite Rmult_assoc; apply Rmult_le_compat_l.
   apply pow_le.
   apply Rle_trans with 1.
@@ -292,9 +292,9 @@ Proof.
   apply le_trans with (pred N).
   apply H0.
   apply le_pred_n.
-  replace (C N N0 / INR (fact N)) with (/ Rsqr (INR (fact N0))).
+  replace (C N N0 / INR (fact N)) with (/ ((INR (fact N0)) ^ 2)).
   rewrite H4; rewrite div2_S_double; right; reflexivity.
-  unfold Rsqr, C, Rdiv.
+  rewrite !Rsqr_def; unfold C, Rdiv.
   repeat rewrite Rinv_mult_distr.
   rewrite (Rmult_comm (INR (fact N))).
   repeat rewrite Rmult_assoc.
@@ -354,10 +354,10 @@ Proof.
   rewrite H4; ring.
   cut (S N = (2 * S N0)%nat).
   intro.
-  replace (C (S N) (S N0) / INR (fact (S N))) with (/ Rsqr (INR (fact (S N0)))).
+  replace (C (S N) (S N0) / INR (fact (S N))) with (/ ((INR (fact (S N0)))) ^ 2).
   rewrite H5; rewrite div2_double.
   right; reflexivity.
-  unfold Rsqr, C, Rdiv.
+  rewrite !Rsqr_def; unfold C, Rdiv.
   repeat rewrite Rinv_mult_distr.
   replace (S N - S N0)%nat with (S N0).
   rewrite (Rmult_comm (INR (fact (S N)))).
@@ -390,7 +390,7 @@ Proof.
   left; apply Rlt_0_1.
   apply RmaxLess1.
   apply Rle_trans with
-    (sum_f_R0 (fun k:nat => INR (N - k) * / Rsqr (INR (fact (div2 (S N)))))
+    (sum_f_R0 (fun k:nat => INR (N - k) * / ((INR (fact (div2 (S N))) ^ 2)))
       (pred N)).
   apply sum_Rle; intros.
   rewrite sum_cte.
@@ -408,9 +408,9 @@ Proof.
   apply H0.
   apply le_pred_n.
   apply Rle_trans with
-    (sum_f_R0 (fun k:nat => INR N * / Rsqr (INR (fact (div2 (S N))))) (pred N)).
+    (sum_f_R0 (fun k:nat => INR N * / ((INR (fact (div2 (S N)))) ^ 2 )) (pred N)).
   apply sum_Rle; intros.
-  do 2 rewrite <- (Rmult_comm (/ Rsqr (INR (fact (div2 (S N)))))).
+  do 2 rewrite <- (Rmult_comm (/ ((INR (fact (div2 (S N)))) ^ 2) )).
   apply Rmult_le_compat_l.
   left; apply Rinv_0_lt_compat; apply Rsqr_pos_lt.
   apply INR_fact_neq_0.
@@ -431,7 +431,7 @@ Proof.
   left; apply Rinv_0_lt_compat; apply Rsqr_pos_lt; apply INR_fact_neq_0.
   rewrite <- H0.
   cut (INR N <= INR (2 * div2 (S N))).
-  intro; apply Rmult_le_reg_l with (Rsqr (INR (div2 (S N)))).
+  intro; apply Rmult_le_reg_l with ((INR (div2 (S N))) ^ 2).
   apply Rsqr_pos_lt.
   apply not_O_INR; red; intro.
   cut (1 < S N)%nat.
@@ -441,8 +441,9 @@ Proof.
   repeat rewrite <- Rmult_assoc.
   rewrite <- Rinv_r_sym.
   rewrite Rmult_1_l.
-  change 4 with (Rsqr 2).
+  replace 4 with (2 ^ 2) by ring.
   rewrite <- Rsqr_mult.
+  rewrite <- Rsqr_def.
   apply Rsqr_incr_1.
   change 2 with (INR 2).
   rewrite Rmult_comm, <- mult_INR; apply H1.
@@ -452,7 +453,7 @@ Proof.
   apply lt_n_S; apply H.
   now apply IZR_lt.
   cut (1 < S N)%nat.
-  intro; unfold Rsqr; apply prod_neq_R0; apply not_O_INR; intro;
+  intro; rewrite !Rsqr_def; apply prod_neq_R0; apply not_O_INR; intro;
     assert (H4 := div2_not_R0 _ H2); rewrite H3 in H4;
       elim (lt_n_O _ H4).
   apply lt_n_S; apply H.
@@ -475,8 +476,8 @@ Proof.
   pattern 1 at 1; rewrite <- Rplus_0_r; apply Rplus_le_compat_l; left;
     apply Rlt_0_1.
   ring.
-  unfold Rsqr; apply prod_neq_R0; apply INR_fact_neq_0.
-  unfold Rsqr; apply prod_neq_R0; apply not_O_INR; discriminate.
+  rewrite !Rsqr_def; apply prod_neq_R0; apply INR_fact_neq_0.
+  rewrite !Rsqr_def; apply prod_neq_R0; apply not_O_INR; discriminate.
   assert (H0 := even_odd_cor N).
   elim H0; intros N0 H1.
   elim H1; intro.
@@ -499,7 +500,7 @@ Proof.
   apply S_pred with 0%nat; apply H.
 Qed.
 
-Lemma maj_Reste_cv_R0 : forall x y:R, Un_cv (maj_Reste_E x y) 0.
+Lemma maj_Reste_cv_R0 x y : Un_cv (maj_Reste_E x y) 0.
 Proof.
   intros; assert (H := Majxy_cv_R0 x y).
   unfold Un_cv in H; unfold Un_cv; intros.
@@ -518,7 +519,7 @@ Proof.
         INR (fact (div2 (pred n))))).
   apply Rmult_le_compat_l.
   left; prove_sup0.
-  unfold Rdiv, Rsqr; rewrite Rinv_mult_distr.
+  unfold Rdiv; rewrite !Rsqr_def, Rinv_mult_distr.
   rewrite (Rmult_comm (Rmax 1 (Rmax (Rabs x) (Rabs y)) ^ (2 * n)));
     rewrite
       (Rmult_comm (Rmax 1 (Rmax (Rabs x) (Rabs y)) ^ (4 * S (div2 (pred n)))))

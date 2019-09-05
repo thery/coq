@@ -652,10 +652,10 @@ Qed.
 (** We can now define the square root function as the reciprocal
    transformation of the square function *)
 Lemma Rsqrt_exists :
-  forall y:R, 0 <= y -> { z:R | 0 <= z /\ y = Rsqr z }.
+  forall y:R, 0 <= y -> { z:R | 0 <= z /\ y = z ^ 2 }.
 Proof.
   intros.
-  set (f := fun x:R => Rsqr x - y).
+  set (f := fun x:R => x ^ 2 - y).
   cut (f 0 <= 0).
   intro.
   cut (continuity f).
@@ -704,10 +704,11 @@ Proof.
   rewrite Rplus_0_r; rewrite Rplus_comm; unfold Rminus;
     rewrite Rplus_assoc; rewrite Rplus_opp_l; rewrite Rplus_0_r.
   pattern y at 1; rewrite <- Rmult_1_r.
-  unfold Rsqr; apply Rmult_le_compat_l.
+  replace (y ^ 2) with (y * y) by ring.
+  apply Rmult_le_compat_l.
   assumption.
   left; exact Hgt.
-  replace f with (Rsqr - fct_cte y)%F.
+  replace f with ((fun x => x ^ 2) - fct_cte y)%F.
   apply continuity_minus.
   apply derivable_continuous; apply derivable_Rsqr.
   apply derivable_continuous; apply derivable_const.
@@ -739,7 +740,7 @@ Proof.
 Qed.
 
 (**********)
-Lemma Rsqrt_Rsqrt : forall x:nonnegreal, Rsqrt x * Rsqrt x = x.
+Lemma Rsqrt_Rsqrt : forall x:nonnegreal, Rsqrt x ^ 2 = x.
 Proof.
   intros.
   destruct (Rsqrt_exists (nonneg x) (cond_nonneg x)) as (x0 & H1 & H2).
